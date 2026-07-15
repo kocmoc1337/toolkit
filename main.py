@@ -1,13 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-╔═══════════════════════════════════════════════════════════╗
-║   U L T R A   D D O S   -   P H A N T O M   E D I T I O N ║
-║        Cyberpunk Terminal Interface                       ║
-║              [ErrorCode404] ver 5.0                        ║
-╚═══════════════════════════════════════════════════════════╝
-"""
-
 import os
 import sys
 import time
@@ -37,46 +27,36 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# ================= COLORS =================
-class C:
-    CYAN = '\033[96m'
-    MAGENTA = '\033[95m'
-    GREEN = '\033[92m'
-    BLUE = '\033[94m'
-    RED = '\033[91m'
-    WHITE = '\033[97m'
-    YELLOW = '\033[93m'
-    BOLD = '\033[1m'
-    DIM = '\033[2m'
-    RESET = '\033[0m'
-    
-    @staticmethod
-    def rgb(r, g, b):
-        return f"\033[38;2;{r};{g};{b}m"
-    
-    # Зелёные оттенки (как на скриншоте)
-    GREEN_DARK = rgb(0, 80, 0)
-    GREEN_MID = rgb(0, 140, 0)
-    GREEN_LIGHT = rgb(0, 200, 0)
-    GREEN_LIGHT2 = rgb(50, 255, 50)
-    GREEN_MID2 = rgb(0, 180, 0)
-    GREEN_DARK2 = rgb(0, 100, 0)
-    
-    NEON_GREEN = rgb(0, 255, 100)
+# ================= COLORS (как в оригинале) =================
+Reset = "\033[0m"
+Red = "\033[1;31m"
+Green = "\033[1;33m"      # жёлтый
+Blue = "\033[1;34m"
+Grey = "\033[1;30m"
+Purple = "\033[0;35m"
 
-# ================= БАННЕР (ЗЕЛЁНЫЙ ГРАДИЕНТ) =================
+g = "\033[1;32m"          # зелёный
+r = "\033[1;31m"
+w = "\033[0m"
+b = "\033[1;34m"
+o = "\033[1;33m"          # жёлтый
+bl = "\033[1;36;40m"
+
+# ================= БАННЕР (как в оригинале) =================
 def banner():
     print(f"""
-{C.GREEN_DARK} ██    ██  ██▓  ▄▄▄█████▓ ██▀███   ▄▄▄         ▓█████▄ ▓█████▄  ▒█████    ██████ {C.RESET}
-{C.GREEN_MID}  ██  ▓██▒▓██▒  ▓  ██▒ ▓▒▓██ ▒ ██▒▒████▄       ▒██▀ ██▌▒██▀ ██▌▒██▒  ██▒▒██    ▒ {C.RESET}
-{C.GREEN_LIGHT}  ▓██  ▒██░▒██░  ▒ ▓██░ ▒░▓██ ░▄█ ▒▒██  ▀█▄     ░██   █▌░██   █▌▒██░  ██▒░ ▓██▄   {C.RESET}
-{C.GREEN_LIGHT2}  ▓▓█  ░██░▒██░  ░ ▓██▓ ░ ▒██▀▀█▄  ░██▄▄▄▄██    ░▓█▄   ▌░▓█▄   ▌▒██   ██░  ▒   ██▒{C.RESET}
-{C.GREEN_MID2}  ▒▒█████▓ ░██████▒▒██▒ ░ ░██▓ ▒██▒ ▓█   ▓██▒   ░▒████▓ ░▒████▓ ░ ████▓▒░▒██████▒▒{C.RESET}
-{C.GREEN_DARK2}  ░▒▓▒ ▒ ▒ ░ ▒░▓  ░▒ ░░   ░ ▒▓ ░▒▓░ ▒▒   ▓▒█░    ▒▒▓  ▒  ▒▒▓  ▒ ░ ▒░▒░▒░ ▒ ▒▓▒ ▒ ░{C.RESET}
-{C.GREEN_DARK}  ░░▒░ ░ ░ ░ ░ ▒  ░  ░      ░▒ ░ ▒░  ▒   ▒▒ ░    ░ ▒  ▒  ░ ▒  ▒   ░ ▒ ▒░ ░ ░▒  ░ ░{C.RESET}
-{C.GREEN_MID}   ░░░ ░ ░   ░ ░   ░        ░░   ░   ░   ▒       ░ ░  ░  ░ ░  ░ ░ ░ ░ ▒  ░  ░  ░  {C.RESET}
-{C.GREEN_LIGHT}     ░         ░  ░          ░           ░  ░      ░       ░        ░ ░        ░  {C.RESET}
-{C.GREEN_LIGHT2}                                               ░       ░                           {C.RESET}
+{Green}Version
+{Green}v1.1.0realise
+
+{Green}Developer:{w} verifactor @newince
+
+{Green}While IP
+{Green}Target
+
+{Green}While the Port:{w} 8888
+
+{Green}Launch DDoS{w}please wait a few seconds
+{Reset}
 """)
 
 # ================= КОНФИГ =================
@@ -158,9 +138,8 @@ def safe_int(prompt, default=100, min_val=1, max_val=1000):
             v = int(u)
             if min_val <= v <= max_val:
                 return v
-            print(f"{C.RED}[!] От {min_val} до {max_val}{C.RESET}")
         except:
-            print(f"{C.RED}[!] Введи число{C.RESET}")
+            pass
 
 # ================= LOAD TESTER =================
 class LoadTester:
@@ -300,168 +279,138 @@ class LoadTester:
 # ================= UI =================
 class UI:
     def __init__(self):
-        self.width = 120
         self.running = True
         self.menu = 'main'
-        self.matrix = list('アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789')
         self.tester = LoadTester()
 
     def clear(self):
         os.system('cls')
 
-    def matrix_rain(self, lines=2):
-        for _ in range(lines):
-            row = ''.join(random.choices(self.matrix, k=self.width))
-            print(f"{C.NEON_GREEN}{row}{C.RESET}")
-
     def header(self):
         banner()
-        print(f"""
-{C.GREEN_LIGHT2}╔{'═' * 116}╗{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET} {C.DIM}[ErrorCode404] {datetime.now().strftime('%H:%M:%S')} | Status: {C.GREEN_LIGHT}● ONLINE{C.RESET}{' ' * 85}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_MID}╠{'═' * 116}╣{C.RESET}
-""")
-
-    def footer(self):
-        print(f"""
-{C.GREEN_MID}╠{'═' * 116}╣{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET} {C.DIM}v5.0 | by @jecrs | verificator | Neural Link: ACTIVE | Firewall: ENABLED{C.RESET}{' ' * 33}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_DARK}╚{'═' * 116}╝{C.RESET}
-""")
 
     def main_menu(self):
         self.clear()
-        self.matrix_rain(2)
         self.header()
         print(f"""
-{C.GREEN_LIGHT}║{C.RESET}  {C.BOLD}{C.GREEN_LIGHT2}[MAIN MENU]{C.RESET}{' ' * 106}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}  {C.GREEN_LIGHT2}➤ [1]{C.RESET} HTTP Load Test            {C.DIM}| HTTP/HTTPS нагрузка{C.RESET}{' ' * 55}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}  {C.GREEN_MID}➤ [2]{C.RESET} TCP Load Test             {C.DIM}| TCP нагрузка{C.RESET}{' ' * 68}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}  {C.GREEN_DARK2}➤ [3]{C.RESET} View Logs                 {C.DIM}| Логи тестов{C.RESET}{' ' * 70}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}  {C.GREEN_MID2}➤ [4]{C.RESET} Proxy Management          {C.DIM}| Управление прокси{C.RESET}{' ' * 58}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}  {C.GREEN_LIGHT}➤ [5]{C.RESET} Total Statistics           {C.DIM}| Общая статистика{C.RESET}{' ' * 59}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}  {C.GREEN_LIGHT2}➤ [6]{C.RESET} History                  {C.DIM}| История тестов{C.RESET}{' ' * 68}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}  {C.GREEN_DARK}➤ [7]{C.RESET} Settings                  {C.DIM}| Настройки{C.RESET}{' ' * 74}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}  {C.GREEN_MID}➤ [8]{C.RESET} INFO                     {C.DIM}| Инструкция{C.RESET}{' ' * 71}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}  {C.RED}[X]{C.RESET} EXIT                      {C.DIM}| Выход{C.RESET}{' ' * 85}{C.GREEN_LIGHT}║{C.RESET}
+{Green}ГЛАВНОЕ МЕНЮ
+
+{Green}1.{w} DDos Ip Address
+{Green}2.{w} View Url Ip Address
+{Green}3.{w} DDos site logs
+{Green}4.{w} Proxy Management
+{Green}5.{w} Total Statistics
+{Green}6.{w} History
+{Green}7.{w} Settings
+{Green}8.{w} INFO — инструкция по использованию
+{Green}99.{w} Exit
+{Reset}
 """)
-        self.footer()
 
     def info_menu(self):
         self.clear()
-        self.matrix_rain(1)
         self.header()
         print(f"""
-{C.GREEN_LIGHT2}║{C.RESET}  {C.BOLD}{C.GREEN_LIGHT}[INSTRUCTIONS]{C.RESET}{' ' * 105}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}  {C.GREEN_LIGHT}■ HTTP Load Test{C.RESET}{' ' * 96}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}    └─ Запускает HTTP/HTTPS нагрузку на указанный URL/IP{C.RESET}{' ' * 54}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}  {C.GREEN_MID}■ TCP Load Test{C.RESET}{' ' * 98}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}    └─ Запускает TCP нагрузку на указанный URL{C.RESET}{' ' * 69}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}  {C.GREEN_DARK2}■ View Logs{C.RESET}{' ' * 102}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}    └─ Показывает общую статистику всех тестов{C.RESET}{' ' * 64}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}  {C.GREEN_MID2}■ Proxy Management{C.RESET}{' ' * 94}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}    └─ Добавление, удаление и проверка прокси{C.RESET}{' ' * 62}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}  {C.GREEN_LIGHT}■ Total Statistics{C.RESET}{' ' * 94}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}    └─ Суммарная статистика по всем тестам{C.RESET}{' ' * 66}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}  {C.GREEN_MID}■ History{C.RESET}{' ' * 104}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}    └─ Последние 100 проведённых тестов{C.RESET}{' ' * 67}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}  {C.GREEN_DARK}■ Settings{C.RESET}{' ' * 104}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}    └─ Настройка потоков, таймаута и ротации прокси{C.RESET}{' ' * 54}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}  {C.BOLD}[BACK]{C.RESET} Return to Main Menu{' ' * 89}{C.GREEN_LIGHT2}║{C.RESET}
+{Green}ИНСТРУКЦИЯ ПО ИСПОЛЬЗОВАНИЮ
+
+{Green}1.{w} DDOS IP ADDRESS — HTTP/HTTPS флуд по IP
+{Green}2.{w} VIEW URL IP ADDRESS — TCP-флуд по URL
+{Green}3.{w} DDOS SITE LOGS — логи атак
+{Green}4.{w} PROXY MANAGEMENT — управление прокси
+{Green}5.{w} TOTAL STATISTICS — общая статистика
+{Green}6.{w} HISTORY — история атак
+{Green}7.{w} SETTINGS — настройки
+{Green}8.{w} INFO — эта инструкция
+{Green}99.{w} EXIT — выход
+{Reset}
 """)
-        self.footer()
+        input(f"{Green}Нажми ENTER для возврата...{Reset}")
 
     def settings_menu(self):
+        global CONFIG
         self.clear()
-        self.matrix_rain(1)
         self.header()
         print(f"""
-{C.GREEN_MID}║{C.RESET}  {C.BOLD}{C.GREEN_LIGHT2}[SETTINGS]{C.RESET}{' ' * 107}{C.GREEN_MID}║{C.RESET}
-{C.GREEN_MID}║{C.RESET}{' ' * 116}{C.GREEN_MID}║{C.RESET}
-{C.GREEN_MID}║{C.RESET}  {C.GREEN_LIGHT}■ Max Threads :{C.RESET} {C.WHITE}{CONFIG['max_threads']}{C.RESET}{' ' * 98}{C.GREEN_MID}║{C.RESET}
-{C.GREEN_MID}║{C.RESET}  {C.GREEN_MID2}■ Timeout     :{C.RESET} {C.WHITE}{CONFIG['timeout']}s{C.RESET}{' ' * 103}{C.GREEN_MID}║{C.RESET}
-{C.GREEN_MID}║{C.RESET}  {C.GREEN_DARK2}■ Max Duration:{C.RESET} {C.WHITE}{CONFIG['max_duration']}s{C.RESET}{' ' * 97}{C.GREEN_MID}║{C.RESET}
-{C.GREEN_MID}║{C.RESET}  {C.GREEN_DARK}■ Proxy Rot.  :{C.RESET} {C.WHITE}{CONFIG['proxy_rotation_interval']}{C.RESET}{' ' * 90}{C.GREEN_MID}║{C.RESET}
-{C.GREEN_MID}║{C.RESET}{' ' * 116}{C.GREEN_MID}║{C.RESET}
-{C.GREEN_MID}║{C.RESET}  {C.GREEN_LIGHT}[1]{C.RESET} Edit Max Threads{' ' * 83}{C.GREEN_MID}║{C.RESET}
-{C.GREEN_MID}║{C.RESET}  {C.GREEN_MID2}[2]{C.RESET} Edit Timeout{' ' * 89}{C.GREEN_MID}║{C.RESET}
-{C.GREEN_MID}║{C.RESET}  {C.GREEN_DARK2}[3]{C.RESET} Edit Max Duration{' ' * 82}{C.GREEN_MID}║{C.RESET}
-{C.GREEN_MID}║{C.RESET}  {C.GREEN_DARK}[4]{C.RESET} Edit Proxy Rotation{' ' * 78}{C.GREEN_MID}║{C.RESET}
-{C.GREEN_MID}║{C.RESET}{' ' * 116}{C.GREEN_MID}║{C.RESET}
-{C.GREEN_MID}║{C.RESET}  {C.BOLD}[BACK]{C.RESET} Return to Main Menu{' ' * 89}{C.GREEN_MID}║{C.RESET}
+{Green}НАСТРОЙКИ
+
+{Green}1.{w} Max Threads : {CONFIG['max_threads']}
+{Green}2.{w} Timeout     : {CONFIG['timeout']}s
+{Green}3.{w} Max Duration: {CONFIG['max_duration']}s
+{Green}4.{w} Proxy Rot.  : {CONFIG['proxy_rotation_interval']}
+{Green}99.{w} Назад
+{Reset}
 """)
-        self.footer()
+        choice = input(f"{Green}Выбери: {w}")
+        if choice == '1':
+            v = safe_int(f"{Green}Max Threads (100-2000): {w}", 1000, 100, 2000)
+            CONFIG['max_threads'] = v
+        elif choice == '2':
+            while True:
+                v = input(f"{Green}Timeout (0.5-10): {w}")
+                try:
+                    v = float(v)
+                    if 0.5 <= v <= 10:
+                        CONFIG['timeout'] = v
+                        break
+                except:
+                    pass
+        elif choice == '3':
+            v = safe_int(f"{Green}Max Duration (0 = no limit): {w}", 0, 0, 99999)
+            CONFIG['max_duration'] = v
+        elif choice == '4':
+            v = safe_int(f"{Green}Proxy Rotation (5-100): {w}", 10, 5, 100)
+            CONFIG['proxy_rotation_interval'] = v
+        elif choice == '99':
+            return
+        self.settings_menu()
 
     def history_menu(self):
         self.clear()
-        self.matrix_rain(1)
         self.header()
         h = load_history()
-        print(f"""
-{C.GREEN_LIGHT}║{C.RESET}  {C.BOLD}{C.GREEN_LIGHT2}[HISTORY - LAST 10]{C.RESET}{' ' * 96}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT}║{C.RESET}
-""")
+        print(f"{Green}ИСТОРИЯ (последние 10){Reset}")
         if not h:
-            print(f"{C.GREEN_LIGHT}║{C.RESET}  {C.DIM}No records found{' ' * 97}{C.GREEN_LIGHT}║{C.RESET}")
+            print(f"{Green}Нет записей{Reset}")
         else:
             for i, e in enumerate(h[-10:], 1):
                 t = e.get('target', 'N/A')[:25]
                 r = e.get('requests', 0)
                 ts = e.get('timestamp', '')[:16]
-                print(f"{C.GREEN_LIGHT}║{C.RESET}  {C.GREEN_LIGHT2}{i}.{C.RESET} {C.WHITE}{t:<25}{C.RESET} {C.GREEN_MID}{r} req{C.RESET} {C.DIM}{ts}{C.RESET}{' ' * (116 - 4 - 25 - len(str(r)) - len(ts) - 10)}{C.GREEN_LIGHT}║{C.RESET}")
-        print(f"""
-{C.GREEN_LIGHT}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}  {C.BOLD}[BACK]{C.RESET} Return to Main Menu{' ' * 89}{C.GREEN_LIGHT}║{C.RESET}
-""")
-        self.footer()
+                print(f"{Green}{i}.{w} {t}  {Green}{r} req{w}  {Green}{ts}{Reset}")
+        input(f"{Green}Нажми ENTER...{Reset}")
 
     def stats_menu(self):
         self.clear()
-        self.matrix_rain(1)
         self.header()
         s = load_stats()
         print(f"""
-{C.GREEN_LIGHT2}║{C.RESET}  {C.BOLD}{C.GREEN_LIGHT}[TOTAL STATISTICS]{C.RESET}{' ' * 98}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}  Attacks : {C.WHITE}{s['attacks']}{C.RESET}{' ' * 98}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}  Requests: {C.WHITE}{s['requests']:,}{C.RESET}{' ' * 89}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}  Success : {C.WHITE}{s['success']:,}{C.RESET}{' ' * 90}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}  Errors  : {C.WHITE}{s['errors']:,}{C.RESET}{' ' * 90}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT2}║{C.RESET}
-{C.GREEN_LIGHT2}║{C.RESET}  {C.BOLD}[BACK]{C.RESET} Return to Main Menu{' ' * 89}{C.GREEN_LIGHT2}║{C.RESET}
+{Green}ОБЩАЯ СТАТИСТИКА
+
+{Green}Атак    : {w}{s['attacks']}
+{Green}Запросов: {w}{s['requests']:,}
+{Green}Успешно : {w}{s['success']:,}
+{Green}Ошибок  : {w}{s['errors']:,}
+{Reset}
 """)
-        self.footer()
+        input(f"{Green}Нажми ENTER...{Reset}")
 
     def logs_menu(self):
         self.clear()
-        self.matrix_rain(1)
         self.header()
         s = load_stats()
         print(f"""
-{C.GREEN_DARK2}║{C.RESET}  {C.BOLD}{C.GREEN_LIGHT2}[SYSTEM LOGS]{C.RESET}{' ' * 103}{C.GREEN_DARK2}║{C.RESET}
-{C.GREEN_DARK2}║{C.RESET}{' ' * 116}{C.GREEN_DARK2}║{C.RESET}
-{C.GREEN_DARK2}║{C.RESET}  Total Attacks: {C.WHITE}{s['attacks']}{C.RESET}{' ' * 98}{C.GREEN_DARK2}║{C.RESET}
-{C.GREEN_DARK2}║{C.RESET}  Total Requests: {C.WHITE}{s['requests']:,}{C.RESET}{' ' * 89}{C.GREEN_DARK2}║{C.RESET}
-{C.GREEN_DARK2}║{C.RESET}  Total Success : {C.WHITE}{s['success']:,}{C.RESET}{' ' * 89}{C.GREEN_DARK2}║{C.RESET}
-{C.GREEN_DARK2}║{C.RESET}  Total Errors  : {C.WHITE}{s['errors']:,}{C.RESET}{' ' * 89}{C.GREEN_DARK2}║{C.RESET}
-{C.GREEN_DARK2}║{C.RESET}{' ' * 116}{C.GREEN_DARK2}║{C.RESET}
-{C.GREEN_DARK2}║{C.RESET}  {C.BOLD}[BACK]{C.RESET} Return to Main Menu{' ' * 89}{C.GREEN_DARK2}║{C.RESET}
+{Green}ЛОГИ СИСТЕМЫ
+
+{Green}Всего атак    : {w}{s['attacks']}
+{Green}Всего запросов: {w}{s['requests']:,}
+{Green}Всего успешно : {w}{s['success']:,}
+{Green}Всего ошибок  : {w}{s['errors']:,}
+{Reset}
 """)
-        self.footer()
+        input(f"{Green}Нажми ENTER...{Reset}")
 
     def proxy_menu(self):
         self.clear()
-        self.matrix_rain(1)
         self.header()
         try:
             with open('proxies.txt', 'r') as f:
@@ -469,17 +418,58 @@ class UI:
         except:
             proxies = []
         print(f"""
-{C.GREEN_MID2}║{C.RESET}  {C.BOLD}{C.GREEN_LIGHT2}[PROXY MANAGEMENT]{C.RESET}{' ' * 96}{C.GREEN_MID2}║{C.RESET}
-{C.GREEN_MID2}║{C.RESET}{' ' * 116}{C.GREEN_MID2}║{C.RESET}
-{C.GREEN_MID2}║{C.RESET}  {C.GREEN_LIGHT}[1]{C.RESET} Add proxy manually{' ' * 82}{C.GREEN_MID2}║{C.RESET}
-{C.GREEN_MID2}║{C.RESET}  {C.GREEN_MID2}[2]{C.RESET} Load from file{' ' * 84}{C.GREEN_MID2}║{C.RESET}
-{C.GREEN_MID2}║{C.RESET}  {C.GREEN_DARK2}[3]{C.RESET} Show list ({len(proxies)}){' ' * 76}{C.GREEN_MID2}║{C.RESET}
-{C.GREEN_MID2}║{C.RESET}  {C.GREEN_DARK}[4]{C.RESET} Clear list{' ' * 89}{C.GREEN_MID2}║{C.RESET}
-{C.GREEN_MID2}║{C.RESET}  {C.GREEN_LIGHT2}[5]{C.RESET} Check all{' ' * 86}{C.GREEN_MID2}║{C.RESET}
-{C.GREEN_MID2}║{C.RESET}{' ' * 116}{C.GREEN_MID2}║{C.RESET}
-{C.GREEN_MID2}║{C.RESET}  {C.BOLD}[BACK]{C.RESET} Return to Main Menu{' ' * 89}{C.GREEN_MID2}║{C.RESET}
+{Green}УПРАВЛЕНИЕ ПРОКСИ
+
+{Green}1.{w} Добавить прокси вручную
+{Green}2.{w} Загрузить из файла
+{Green}3.{w} Показать список ({len(proxies)})
+{Green}4.{w} Очистить список
+{Green}5.{w} Проверить все прокси
+{Green}99.{w} Назад
+{Reset}
 """)
-        self.footer()
+        choice = input(f"{Green}Выбери: {w}")
+        if choice == '1':
+            p = input(f"{Green}Прокси (http://ip:port): {w}")
+            if p:
+                with open('proxies.txt', 'a') as f:
+                    f.write(p + '\n')
+                print(f"{Green}[OK] Добавлен{Reset}")
+        elif choice == '2':
+            try:
+                with open('proxies.txt', 'r') as f:
+                    cnt = len([l for l in f if l.strip()])
+                print(f"{Green}[OK] Загружено {cnt}{Reset}")
+            except:
+                print(f"{Red}[!] Файл не найден{Reset}")
+        elif choice == '3':
+            if proxies:
+                print(f"\n{Green}Список:{Reset}")
+                for i, p in enumerate(proxies, 1):
+                    print(f"{Green}{i}. {w}{p}{Reset}")
+            else:
+                print(f"{Red}[!] Пусто{Reset}")
+            input(f"{Green}Нажми ENTER...{Reset}")
+        elif choice == '4':
+            open('proxies.txt', 'w').close()
+            print(f"{Green}[OK] Очищено{Reset}")
+        elif choice == '5':
+            print(f"{Green}[!] Проверка...{Reset}")
+            async def check():
+                valid = []
+                for p in proxies:
+                    if await check_proxy(p):
+                        valid.append(p)
+                return valid
+            if proxies:
+                valid = asyncio.run(check())
+                with open('proxies.txt', 'w') as f:
+                    f.write('\n'.join(valid))
+                print(f"{Green}[OK] Работает: {len(valid)}/{len(proxies)}{Reset}")
+            time.sleep(1)
+        elif choice == '99':
+            return
+        self.proxy_menu()
 
     def attack_progress(self, url, threads, t):
         elapsed = int(time.time() - t.start_time)
@@ -488,25 +478,23 @@ class UI:
         bar = '█' * (load // 2) + '░' * (50 - load // 2)
         
         self.clear()
-        self.matrix_rain(1)
         self.header()
         print(f"""
-{C.GREEN_LIGHT}║{C.RESET}  {C.BOLD}{C.GREEN_LIGHT2}[ATTACK IN PROGRESS]{C.RESET}{' ' * 93}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}  Target : {C.WHITE}{url[:30]}{C.RESET}{' ' * 84}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}  Threads: {C.WHITE}{threads}{C.RESET}{' ' * 88}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}  Req    : {C.WHITE}{t.requests:,}{C.RESET}{' ' * 90}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}  Rate   : {C.WHITE}{rate:,} r/s{C.RESET}{' ' * 84}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}  OK     : {C.WHITE}{t.success:,}{C.RESET}{' ' * 91}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}  ERR    : {C.WHITE}{t.errors:,}{C.RESET}{' ' * 91}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}  BAN    : {C.WHITE}{t.banned}{C.RESET}{' ' * 91}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}  Load   : {C.WHITE}[{bar}] {load}%{C.RESET}{' ' * 90}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}  Time   : {C.WHITE}{elapsed//3600:02d}:{elapsed%3600//60:02d}:{elapsed%60:02d}{C.RESET}{' ' * 84}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}  Data   : {C.WHITE}{t.bytes_sent/1024/1024:.1f} MB{C.RESET}{' ' * 85}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT}║{C.RESET}
-{C.GREEN_LIGHT}║{C.RESET}  {C.YELLOW}[Press ENTER to stop]{C.RESET}{' ' * 87}{C.GREEN_LIGHT}║{C.RESET}
+{Green}АТАКА В ПРОЦЕССЕ
+
+{Green}Цель   : {w}{url[:30]}
+{Green}Потоки : {w}{threads}
+{Green}Запросы: {w}{t.requests:,}
+{Green}Скорость: {w}{rate:,} r/s
+{Green}Успешно: {w}{t.success:,}
+{Green}Ошибки : {w}{t.errors:,}
+{Green}Бан    : {w}{t.banned}
+{Green}Нагрузка: {w}[{bar}] {load}%
+{Green}Время   : {w}{elapsed//3600:02d}:{elapsed%3600//60:02d}:{elapsed%60:02d}
+{Green}Данные  : {w}{t.bytes_sent/1024/1024:.1f} MB
+{Green}[Press ENTER to stop]
+{Reset}
 """)
-        self.footer()
 
     def handle(self, choice):
         if self.menu == 'main':
@@ -526,88 +514,21 @@ class UI:
                 self.menu = 'settings'
             elif choice == '8':
                 self.menu = 'info'
-            elif choice.upper() == 'X':
+            elif choice == '99':
                 self.running = False
         elif choice.lower() == 'back':
             self.menu = 'main'
-        elif self.menu == 'settings':
-            if choice == '1':
-                v = safe_int(f"{C.CYAN}Max Threads (100-2000): {C.WHITE}", 1000, 100, 2000)
-                CONFIG['max_threads'] = v
-            elif choice == '2':
-                while True:
-                    v = input(f"{C.CYAN}Timeout (0.5-10): {C.WHITE}")
-                    try:
-                        v = float(v)
-                        if 0.5 <= v <= 10:
-                            CONFIG['timeout'] = v
-                            break
-                    except:
-                        print(f"{C.RED}[!] Введи число{C.RESET}")
-            elif choice == '3':
-                v = safe_int(f"{C.CYAN}Max Duration (0 = no limit): {C.WHITE}", 0, 0, 99999)
-                CONFIG['max_duration'] = v
-            elif choice == '4':
-                v = safe_int(f"{C.CYAN}Proxy Rotation (5-100): {C.WHITE}", 10, 5, 100)
-                CONFIG['proxy_rotation_interval'] = v
-        elif self.menu == 'proxy':
-            try:
-                with open('proxies.txt', 'r') as f:
-                    proxies = [l.strip() for l in f if l.strip()]
-            except:
-                proxies = []
-            if choice == '1':
-                p = input(f"{C.CYAN}Proxy (http://ip:port): {C.WHITE}")
-                if p:
-                    with open('proxies.txt', 'a') as f:
-                        f.write(p + '\n')
-                    print(f"{C.GREEN_LIGHT2}[OK] Добавлен{C.RESET}")
-            elif choice == '2':
-                try:
-                    with open('proxies.txt', 'r') as f:
-                        cnt = len([l for l in f if l.strip()])
-                    print(f"{C.GREEN_LIGHT2}[OK] Загружено {cnt}{C.RESET}")
-                except:
-                    print(f"{C.RED}[!] Файл не найден{C.RESET}")
-            elif choice == '3':
-                if proxies:
-                    print(f"\n{C.GREEN_LIGHT2}List:{C.RESET}")
-                    for i, p in enumerate(proxies, 1):
-                        print(f"{C.GREEN_LIGHT2}{i}. {C.WHITE}{p}{C.RESET}")
-                else:
-                    print(f"{C.YELLOW}[!] Пусто{C.RESET}")
-                input(f"{C.CYAN}Press ENTER...{C.RESET}")
-            elif choice == '4':
-                open('proxies.txt', 'w').close()
-                print(f"{C.GREEN_LIGHT2}[OK] Очищено{C.RESET}")
-            elif choice == '5':
-                print(f"{C.YELLOW}[!] Проверка...{C.RESET}")
-                async def check():
-                    valid = []
-                    for p in proxies:
-                        if await check_proxy(p):
-                            valid.append(p)
-                    return valid
-                if proxies:
-                    valid = asyncio.run(check())
-                    with open('proxies.txt', 'w') as f:
-                        f.write('\n'.join(valid))
-                    print(f"{C.GREEN_LIGHT2}[OK] Работает: {len(valid)}/{len(proxies)}{C.RESET}")
-                time.sleep(1)
 
     async def http_test(self):
         self.clear()
-        self.matrix_rain(1)
         self.header()
-        print(f"{C.GREEN_LIGHT}║{C.RESET}  {C.BOLD}{C.GREEN_LIGHT2}[HTTP LOAD TEST]{C.RESET}{' ' * 96}{C.GREEN_LIGHT}║{C.RESET}")
-        print(f"{C.GREEN_LIGHT}║{C.RESET}  Type: HTTP/HTTPS Flood{' ' * 79}{C.GREEN_LIGHT}║{C.RESET}")
-        self.footer()
+        print(f"{Green}HTTP НАГРУЗКА — HTTP/HTTPS Flood{Reset}")
         
-        url = input(f"\n{C.GREEN_LIGHT2}Target IP: {C.WHITE}")
+        url = input(f"{Green}Цель: {w}")
         if not url.startswith('http'):
             url = 'http://' + url
         
-        threads = safe_int(f"{C.GREEN_LIGHT2}Threads (1-{CONFIG['max_threads']}): {C.WHITE}", 100, 1, CONFIG['max_threads'])
+        threads = safe_int(f"{Green}Потоки (1-{CONFIG['max_threads']}): {w}", 100, 1, CONFIG['max_threads'])
         
         t = LoadTester()
         task = asyncio.create_task(t.start_http(url, threads))
@@ -636,31 +557,30 @@ class UI:
         save_stats(s)
         
         self.clear()
-        self.matrix_rain(1)
         self.header()
-        print(f"{C.GREEN_LIGHT}║{C.RESET}  {C.BOLD}{C.GREEN_LIGHT2}[ATTACK FINISHED]{C.RESET}{' ' * 96}{C.GREEN_LIGHT}║{C.RESET}")
-        print(f"{C.GREEN_LIGHT}║{C.RESET}  Requests: {C.WHITE}{t.requests:,}{C.RESET}{' ' * 87}{C.GREEN_LIGHT}║{C.RESET}")
-        print(f"{C.GREEN_LIGHT}║{C.RESET}  Success : {C.WHITE}{t.success:,}{C.RESET}{' ' * 88}{C.GREEN_LIGHT}║{C.RESET}")
-        print(f"{C.GREEN_LIGHT}║{C.RESET}  Errors  : {C.WHITE}{t.errors:,}{C.RESET}{' ' * 88}{C.GREEN_LIGHT}║{C.RESET}")
-        print(f"{C.GREEN_LIGHT}║{C.RESET}  Banned  : {C.WHITE}{t.banned}{C.RESET}{' ' * 89}{C.GREEN_LIGHT}║{C.RESET}")
-        print(f"{C.GREEN_LIGHT}║{C.RESET}  Duration: {C.WHITE}{elapsed}s{C.RESET}{' ' * 86}{C.GREEN_LIGHT}║{C.RESET}")
-        print(f"{C.GREEN_LIGHT}║{C.RESET}  Avg Rate: {C.WHITE}{int(t.requests/elapsed) if elapsed>0 else 0} r/s{C.RESET}{' ' * 82}{C.GREEN_LIGHT}║{C.RESET}")
-        self.footer()
-        input(f"\n{C.GREEN_LIGHT2}Press ENTER...{C.RESET}")
+        print(f"""
+{Green}АТАКА ЗАВЕРШЕНА
+
+{Green}Запросы: {w}{t.requests:,}
+{Green}Успешно: {w}{t.success:,}
+{Green}Ошибки : {w}{t.errors:,}
+{Green}Бан    : {w}{t.banned}
+{Green}Время  : {w}{elapsed} сек
+{Green}Скорость: {w}{int(t.requests/elapsed) if elapsed>0 else 0} r/s
+{Reset}
+""")
+        input(f"{Green}Нажми ENTER...{Reset}")
 
     async def tcp_test(self):
         self.clear()
-        self.matrix_rain(1)
         self.header()
-        print(f"{C.GREEN_LIGHT}║{C.RESET}  {C.BOLD}{C.GREEN_MID}[TCP LOAD TEST]{C.RESET}{' ' * 98}{C.GREEN_LIGHT}║{C.RESET}")
-        print(f"{C.GREEN_LIGHT}║{C.RESET}  Type: TCP Flood{' ' * 86}{C.GREEN_LIGHT}║{C.RESET}")
-        self.footer()
+        print(f"{Green}TCP НАГРУЗКА — TCP Flood{Reset}")
         
-        url = input(f"\n{C.GREEN_LIGHT2}Target URL: {C.WHITE}")
+        url = input(f"{Green}Цель: {w}")
         if not url.startswith('http'):
             url = 'http://' + url
         
-        threads = safe_int(f"{C.GREEN_LIGHT2}Threads (1-{CONFIG['max_threads']}): {C.WHITE}", 100, 1, CONFIG['max_threads'])
+        threads = safe_int(f"{Green}Потоки (1-{CONFIG['max_threads']}): {w}", 100, 1, CONFIG['max_threads'])
         
         t = LoadTester()
         task = asyncio.create_task(t.start_tcp(url, threads))
@@ -689,17 +609,19 @@ class UI:
         save_stats(s)
         
         self.clear()
-        self.matrix_rain(1)
         self.header()
-        print(f"{C.GREEN_LIGHT}║{C.RESET}  {C.BOLD}{C.GREEN_MID}[ATTACK FINISHED]{C.RESET}{' ' * 95}{C.GREEN_LIGHT}║{C.RESET}")
-        print(f"{C.GREEN_LIGHT}║{C.RESET}  Requests: {C.WHITE}{t.requests:,}{C.RESET}{' ' * 87}{C.GREEN_LIGHT}║{C.RESET}")
-        print(f"{C.GREEN_LIGHT}║{C.RESET}  Success : {C.WHITE}{t.success:,}{C.RESET}{' ' * 88}{C.GREEN_LIGHT}║{C.RESET}")
-        print(f"{C.GREEN_LIGHT}║{C.RESET}  Errors  : {C.WHITE}{t.errors:,}{C.RESET}{' ' * 88}{C.GREEN_LIGHT}║{C.RESET}")
-        print(f"{C.GREEN_LIGHT}║{C.RESET}  Banned  : {C.WHITE}{t.banned}{C.RESET}{' ' * 89}{C.GREEN_LIGHT}║{C.RESET}")
-        print(f"{C.GREEN_LIGHT}║{C.RESET}  Duration: {C.WHITE}{elapsed}s{C.RESET}{' ' * 86}{C.GREEN_LIGHT}║{C.RESET}")
-        print(f"{C.GREEN_LIGHT}║{C.RESET}  Avg Rate: {C.WHITE}{int(t.requests/elapsed) if elapsed>0 else 0} r/s{C.RESET}{' ' * 82}{C.GREEN_LIGHT}║{C.RESET}")
-        self.footer()
-        input(f"\n{C.GREEN_LIGHT2}Press ENTER...{C.RESET}")
+        print(f"""
+{Green}АТАКА ЗАВЕРШЕНА
+
+{Green}Запросы: {w}{t.requests:,}
+{Green}Успешно: {w}{t.success:,}
+{Green}Ошибки : {w}{t.errors:,}
+{Green}Бан    : {w}{t.banned}
+{Green}Время  : {w}{elapsed} сек
+{Green}Скорость: {w}{int(t.requests/elapsed) if elapsed>0 else 0} r/s
+{Reset}
+""")
+        input(f"{Green}Нажми ENTER...{Reset}")
 
     def render(self):
         if self.menu == 'main':
@@ -721,19 +643,19 @@ class UI:
         try:
             while self.running:
                 self.render()
-                choice = input(f"\n{C.GREEN_LIGHT2}┌─ {C.GREEN_MID}Input{C.GREEN_LIGHT2} ─────────────────────────────────┐\n{C.GREEN_LIGHT2}│{C.RESET} > {C.YELLOW}").strip()
-                print(f"{C.RESET}\n")
+                choice = input(f"\n{Green}┌─ {Green}Input{Green} ─────────────────────────────────┐\n{Green}│{Reset} > {w}").strip()
+                print(f"{Reset}\n")
                 self.handle(choice)
         except KeyboardInterrupt:
             self.clear()
             print(f"""
-{C.GREEN_MID}
+{Green}
 ╔═══════════════════════════════════════════════════════════╗
 ║        TERMINATING NEURAL LINK...                        ║
 ║        System Standby Mode Activated                     ║
 ║        Good Luck, Hacker.                                ║
 ╚═══════════════════════════════════════════════════════════╝
-{C.GREEN_LIGHT2}[ErrorCode404] Session Ended - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}{C.RESET}
+{Green}[ErrorCode404] Session Ended - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}{Reset}
 """)
 
 if __name__ == '__main__':
