@@ -9,12 +9,15 @@ import socket
 import logging
 from datetime import datetime
 
-# ================= LOGGER =================
+# ================= LOGGER (лог в папку со скриптом) =================
+log_dir = os.path.dirname(os.path.abspath(__file__))
+log_file = os.path.join(log_dir, "load_test.log")
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s [%(levelname)s] %(message)s',
     handlers=[
-        logging.FileHandler("load_test.log", encoding="utf-8"),
+        logging.FileHandler(log_file, encoding="utf-8"),
         logging.StreamHandler()
     ]
 )
@@ -48,7 +51,7 @@ PINK = rgb(255, 30, 220)
 PINK_MID = rgb(200, 20, 180)
 WHITE = rgb(255, 255, 255)
 
-# ================= БАННЕР (чистый текст, как на скриншоте) =================
+# ================= БАННЕР =================
 def banner():
     os.system("cls" if os.name == "nt" else "clear")
     print(f"""
