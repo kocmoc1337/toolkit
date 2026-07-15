@@ -74,23 +74,24 @@ def safe_int(prompt, default=100, min_val=1, max_val=1000):
 def bar(p, w=30):
     p = max(0, min(100, p))
     f = int(w * p / 100)
-    c = G if p < 30 else Y if p < 70 else R
-    return f"[{c + '█' * f + E + '░' * (w - f)}] {p}%"
+    return f"[{G7 + '█' * f + E + '░' * (w - f)}] {p}%"
 
 # ================= БАННЕР (ГРАДИЕНТ) =================
 def banner():
-    # Используем позиционирование вместо clear(), чтобы не было мигания
-    print(f"{G1} ██    ██  ██▓  ▄▄▄█████▓ ██▀███   ▄▄▄         ▓█████▄ ▓█████▄  ▒█████    ██████ {E}")
-    print(f"{G2}  ██  ▓██▒▓██▒  ▓  ██▒ ▓▒▓██ ▒ ██▒▒████▄       ▒██▀ ██▌▒██▀ ██▌▒██▒  ██▒▒██    ▒ {E}")
-    print(f"{G3}  ▓██  ▒██░▒██░  ▒ ▓██░ ▒░▓██ ░▄█ ▒▒██  ▀█▄     ░██   █▌░██   █▌▒██░  ██▒░ ▓██▄   {E}")
-    print(f"{G4}  ▓▓█  ░██░▒██░  ░ ▓██▓ ░ ▒██▀▀█▄  ░██▄▄▄▄██    ░▓█▄   ▌░▓█▄   ▌▒██   ██░  ▒   ██▒{E}")
-    print(f"{G5}  ▒▒█████▓ ░██████▒▒██▒ ░ ░██▓ ▒██▒ ▓█   ▓██▒   ░▒████▓ ░▒████▓ ░ ████▓▒░▒██████▒▒{E}")
-    print(f"{G6}  ░▒▓▒ ▒ ▒ ░ ▒░▓  ░▒ ░░   ░ ▒▓ ░▒▓░ ▒▒   ▓▒█░    ▒▒▓  ▒  ▒▒▓  ▒ ░ ▒░▒░▒░ ▒ ▒▓▒ ▒ ░{E}")
-    print(f"{G5}  ░░▒░ ░ ░ ░ ░ ▒  ░  ░      ░▒ ░ ▒░  ▒   ▒▒ ░    ░ ▒  ▒  ░ ▒  ▒   ░ ▒ ▒░ ░ ░▒  ░ ░{E}")
-    print(f"{G3}   ░░░ ░ ░   ░ ░   ░        ░░   ░   ░   ▒       ░ ░  ░  ░ ░  ░ ░ ░ ░ ▒  ░  ░  ░  {E}")
-    print(f"{G2}     ░         ░  ░          ░           ░  ░      ░       ░        ░ ░        ░  {E}")
-    print(f"{G1}                                               ░       ░                           {E}")
-    print(f"{G7}Ultra DDOS v1.1 | Developer: verifactor @newince{E}")
+    print(f"""
+{G1} ██    ██  ██▓  ▄▄▄█████▓ ██▀███   ▄▄▄         ▓█████▄ ▓█████▄  ▒█████    ██████ {E}
+{G2}  ██  ▓██▒▓██▒  ▓  ██▒ ▓▒▓██ ▒ ██▒▒████▄       ▒██▀ ██▌▒██▀ ██▌▒██▒  ██▒▒██    ▒ {E}
+{G3}  ▓██  ▒██░▒██░  ▒ ▓██░ ▒░▓██ ░▄█ ▒▒██  ▀█▄     ░██   █▌░██   █▌▒██░  ██▒░ ▓██▄   {E}
+{G4}  ▓▓█  ░██░▒██░  ░ ▓██▓ ░ ▒██▀▀█▄  ░██▄▄▄▄██    ░▓█▄   ▌░▓█▄   ▌▒██   ██░  ▒   ██▒{E}
+{G5}  ▒▒█████▓ ░██████▒▒██▒ ░ ░██▓ ▒██▒ ▓█   ▓██▒   ░▒████▓ ░▒████▓ ░ ████▓▒░▒██████▒▒{E}
+{G6}  ░▒▓▒ ▒ ▒ ░ ▒░▓  ░▒ ░░   ░ ▒▓ ░▒▓░ ▒▒   ▓▒█░    ▒▒▓  ▒  ▒▒▓  ▒ ░ ▒░▒░▒░ ▒ ▒▓▒ ▒ ░{E}
+{G5}  ░░▒░ ░ ░ ░ ░ ▒  ░  ░      ░▒ ░ ▒░  ▒   ▒▒ ░    ░ ▒  ▒  ░ ▒  ▒   ░ ▒ ▒░ ░ ░▒  ░ ░{E}
+{G3}   ░░░ ░ ░   ░ ░   ░        ░░   ░   ░   ▒       ░ ░  ░  ░ ░  ░ ░ ░ ░ ▒  ░  ░  ░  {E}
+{G2}     ░         ░  ░          ░           ░  ░      ░       ░        ░ ░        ░  {E}
+{G1}                                               ░       ░                           {E}
+{G7}Ultra DDOS v1.1 | Developer: verifactor @newince
+{E}
+""")
 
 # ================= HTTP-АТАКА =================
 class Attack:
@@ -154,46 +155,46 @@ class Attack:
 
 # ================= ВИЗУАЛ (БЕЗ МИГАНИЯ) =================
 def attack_view(url, threads, a, atype="HTTP"):
-    # Вместо clear() используем \033[H — перемещаем курсор в начало
     sys.stdout.write("\033[H")
+    sys.stdout.flush()
     
     elapsed = int(time.time() - a.start)
     rate = int(a.req / elapsed) if elapsed > 0 else 0
     load = min(100, int((rate / (threads * 5)) * 100)) if threads > 0 else 0
     stats = load_stats()
     
+    # Цвета для надписей — всё в градиенте
     print(f"""
-{C}{atype} АТАКА В ПРОЦЕССЕ
+{G6}{atype} АТАКА В ПРОЦЕССЕ
 
-{C}Цель      : {W}{url[:30]}
-{C}Потоки    : {W}{threads}
-{C}Запросы   : {W}{a.req:,}
-{C}Скорость  : {W}{rate:,} r/s
-{C}Успешно   : {G}{a.ok:,}{E}
-{C}Ошибки    : {R}{a.err:,}{E}
-{C}Бан       : {R}{a.ban}{E}
-{C}Нагрузка  : {W}{bar(load)}
-{C}Время     : {W}{elapsed//3600:02d}:{elapsed%3600//60:02d}:{elapsed%60:02d}
-{C}Данные    : {W}{a.bytes/1024/1024:.1f} MB
-{C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-{C}Всего атак за сессию : {W}{stats['attacks']}
-{C}Всего запросов       : {W}{stats['requests']:,}
-{C}Всего успешно        : {G}{stats['success']:,}{E}
-{C}Всего ошибок         : {R}{stats['errors']:,}{E}
-{C}[Press ENTER to stop]
+{G5}Цель      : {W}{url[:30]}
+{G4}Потоки    : {W}{threads}
+{G3}Запросы   : {W}{a.req:,}
+{G2}Скорость  : {W}{rate:,} r/s
+{G3}Успешно   : {G}{a.ok:,}{E}
+{G4}Ошибки    : {R}{a.err:,}{E}
+{G5}Бан       : {R}{a.ban}{E}
+{G6}Нагрузка  : {W}{bar(load)}
+{G7}Время     : {W}{elapsed//3600:02d}:{elapsed%3600//60:02d}:{elapsed%60:02d}
+{G6}Данные    : {W}{a.bytes/1024/1024:.1f} MB
+{G5}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{G4}Всего атак за сессию : {W}{stats['attacks']}
+{G3}Всего запросов       : {W}{stats['requests']:,}
+{G2}Всего успешно        : {G}{stats['success']:,}{E}
+{G1}Всего ошибок         : {R}{stats['errors']:,}{E}
+{G7}[Press ENTER to stop]
 {E}
 """)
 
 # ================= ТЕСТ =================
 def run_test():
-    # Очищаем экран только один раз перед началом атаки
     clear()
     banner()
-    print(f"{C}HTTP НАГРУЗКА{E}")
-    url = input(f"{C}Цель: {W}")
+    print(f"{G7}HTTP НАГРУЗКА{E}")
+    url = input(f"{G6}Цель: {W}")
     if not url.startswith('http'):
         url = 'http://' + url
-    threads = safe_int(f"{C}Потоки (1-{CONFIG['max_threads']}): {W}", 50, 1, CONFIG['max_threads'])
+    threads = safe_int(f"{G5}Потоки (1-{CONFIG['max_threads']}): {W}", 50, 1, CONFIG['max_threads'])
     
     a = Attack()
     t = threading.Thread(target=a.start_http, args=(url, threads), daemon=True)
@@ -205,15 +206,12 @@ def run_test():
         stop[0] = True
     threading.Thread(target=wait, daemon=True).start()
     
-    # Сохраняем баннер в буфер, чтобы не перерисовывать каждый раз
-    banner_text = []
-    # Печатаем баннер один раз
     banner()
     
     try:
         while a.running and not stop[0]:
             attack_view(url, threads, a, "HTTP")
-            time.sleep(0.2)  # Частота обновления
+            time.sleep(0.2)
     except KeyboardInterrupt:
         pass
     
@@ -239,29 +237,29 @@ def run_test():
     clear()
     banner()
     print(f"""
-{C}АТАКА ЗАВЕРШЕНА
+{G7}АТАКА ЗАВЕРШЕНА
 
-{C}Запросы: {W}{a.req:,}
-{C}Успешно: {G}{a.ok:,}{E}
-{C}Ошибки : {R}{a.err:,}{E}
-{C}Бан    : {R}{a.ban}{E}
-{C}Время  : {W}{elapsed} сек
-{C}Скорость: {W}{int(a.req/elapsed) if elapsed>0 else 0} r/s
-{C}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-{C}Всего атак за сессию: {W}{load_stats()['attacks']}
+{G6}Запросы: {W}{a.req:,}
+{G5}Успешно: {G}{a.ok:,}{E}
+{G4}Ошибки : {R}{a.err:,}{E}
+{G3}Бан    : {R}{a.ban}{E}
+{G2}Время  : {W}{elapsed} сек
+{G1}Скорость: {W}{int(a.req/elapsed) if elapsed>0 else 0} r/s
+{G2}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{G3}Всего атак за сессию: {W}{load_stats()['attacks']}
 {E}
 """)
-    input(f"{C}Нажми ENTER для возврата...{E}")
+    input(f"{G7}Нажми ENTER для возврата...{E}")
 
 # ================= МЕНЮ =================
 def menu():
     clear()
     banner()
     print(f"""
-{C}ГЛАВНОЕ МЕНЮ
+{G7}ГЛАВНОЕ МЕНЮ
 
-{C}1.{W} HTTP Load Test
-{C}99.{W} Exit
+{G6}1.{W} HTTP Load Test
+{G5}99.{W} Exit
 {E}
 """)
 
@@ -269,12 +267,12 @@ def menu():
 def main():
     while True:
         menu()
-        ch = input(f"{C}Выбери: {W}")
+        ch = input(f"{G7}Выбери: {W}")
         if ch == '1':
             run_test()
         elif ch == '99':
             clear()
-            print(f"{C}Выход...{E}")
+            print(f"{G7}Выход...{E}")
             sys.exit()
         else:
             print(f"{R}Неверный выбор!{E}")
