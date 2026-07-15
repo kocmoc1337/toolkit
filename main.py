@@ -585,6 +585,9 @@ class UI:
         self.proxy_menu()
 
     def attack_progress(self, url, threads, t, attack_type="HTTP"):
+        # Очищаем экран перед выводом
+        os.system('cls' if os.name == 'nt' else 'clear')
+        
         elapsed = int(time.time() - t.start_time)
         rate = int(t.requests / elapsed) if elapsed > 0 else 0
         max_rate = threads * 10
@@ -593,8 +596,10 @@ class UI:
         
         stats = load_stats()
         
-        self.clear()
+        # Выводим баннер
         self.header()
+        
+        # Выводим прогресс-бар и статистику
         print(f"""
 {G7}{attack_type} АТАКА В ПРОЦЕССЕ
 
