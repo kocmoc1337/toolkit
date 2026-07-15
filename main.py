@@ -52,7 +52,7 @@ G6 = "\033[38;2;0;230;0m"
 G7 = "\033[38;2;50;255;50m"
 GW = "\033[38;2;200;255;200m"
 
-# ================= БАННЕР (только логотип, версия, разработчик) =================
+# ================= БАННЕР =================
 def banner():
     print(f"""
 {G1} ██    ██  ██▓  ▄▄▄█████▓ ██▀███   ▄▄▄         ▓█████▄ ▓█████▄  ▒█████    ██████ {Reset}
@@ -73,7 +73,7 @@ def banner():
 {Reset}
 """)
 
-# ================= АНИМАЦИЯ ЗАПУСКА (после ввода цели) =================
+# ================= АНИМАЦИЯ ЗАПУСКА =================
 def launch_animation():
     frames = [
         f"{G7}[{g}▓{G7}░░░░░░░░░] 10%{Reset}",
@@ -543,7 +543,6 @@ class UI:
         load = min(100, int(rate / 15))
         bar = '█' * (load // 2) + '░' * (50 - load // 2)
         
-        # Получаем общую статистику
         stats = load_stats()
         total_attacks = stats['attacks']
         total_success = stats['success']
@@ -614,6 +613,7 @@ class UI:
         t = LoadTester()
         task = asyncio.create_task(t.start_http(url, threads))
         
+        # Запускаем мониторинг атаки в реальном времени
         while t.running:
             self.attack_progress(url, threads, t, "HTTP")
             await asyncio.sleep(0.3)
@@ -637,8 +637,8 @@ class UI:
         s["errors"] += t.errors
         save_stats(s)
         
-        self.clear()
-        self.header()
+        clear()
+        banner()
         print(f"""
 {G7}АТАКА ЗАВЕРШЕНА
 
@@ -652,7 +652,7 @@ class UI:
 {G6}Всего атак за сессию: {w}{load_stats()['attacks']}
 {Reset}
 """)
-        input(f"{G7}Нажми ENTER...{Reset}")
+        input(f"{G7}Нажми ENTER для возврата в меню...{Reset}")
 
     async def tcp_test(self):
         self.clear()
@@ -671,6 +671,7 @@ class UI:
         t = LoadTester()
         task = asyncio.create_task(t.start_tcp(url, threads))
         
+        # Запускаем мониторинг атаки в реальном времени
         while t.running:
             self.attack_progress(url, threads, t, "TCP")
             await asyncio.sleep(0.3)
@@ -694,8 +695,8 @@ class UI:
         s["errors"] += t.errors
         save_stats(s)
         
-        self.clear()
-        self.header()
+        clear()
+        banner()
         print(f"""
 {G7}АТАКА ЗАВЕРШЕНА
 
@@ -709,7 +710,7 @@ class UI:
 {G6}Всего атак за сессию: {w}{load_stats()['attacks']}
 {Reset}
 """)
-        input(f"{G7}Нажми ENTER...{Reset}")
+        input(f"{G7}Нажми ENTER для возврата в меню...{Reset}")
 
     def render(self):
         if self.menu == 'main':
