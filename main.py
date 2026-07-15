@@ -29,11 +29,13 @@ logger = logging.getLogger(__name__)
 
 # ================= COLORS =================
 Reset = "\033[0m"
-Red = "\033[1;31m"
-Green = "\033[1;33m"
-Blue = "\033[1;34m"
-Grey = "\033[1;30m"
-Purple = "\033[0;35m"
+Red = "\033[91m"          # Ярко-красный
+Green = "\033[92m"        # Ярко-зелёный
+Yellow = "\033[93m"
+Blue = "\033[94m"
+Magenta = "\033[95m"
+Cyan = "\033[96m"
+White = "\033[97m"
 
 g = "\033[1;32m"
 r = "\033[1;31m"
@@ -454,8 +456,8 @@ class UI:
 
 {G7}Атак    : {w}{s['attacks']}
 {G6}Запросов: {w}{s['requests']:,}
-{G5}Успешно : {w}{s['success']:,}
-{G4}Ошибок  : {w}{s['errors']:,}
+{G5}Успешно : {Green}{s['success']:,}{Reset}
+{G4}Ошибок  : {Red}{s['errors']:,}{Reset}
 {Reset}
 """)
         input(f"{G7}Нажми ENTER...{Reset}")
@@ -469,8 +471,8 @@ class UI:
 
 {G7}Всего атак    : {w}{s['attacks']}
 {G6}Всего запросов: {w}{s['requests']:,}
-{G5}Всего успешно : {w}{s['success']:,}
-{G4}Всего ошибок  : {w}{s['errors']:,}
+{G5}Всего успешно : {Green}{s['success']:,}{Reset}
+{G4}Всего ошибок  : {Red}{s['errors']:,}{Reset}
 {Reset}
 """)
         input(f"{G7}Нажми ENTER...{Reset}")
@@ -554,21 +556,21 @@ class UI:
         print(f"""
 {G7}{attack_type} АТАКА В ПРОЦЕССЕ
 
-{G7}Цель   : {w}{url[:30]}
-{G6}Потоки : {w}{threads}
-{G5}Запросы: {w}{t.requests:,}
-{G4}Скорость: {w}{rate:,} r/s
-{G3}Успешно: {w}{t.success:,}
-{G2}Ошибки : {w}{t.errors:,}
-{G1}Бан    : {w}{t.banned}
-{G5}Нагрузка: {w}[{bar}] {load}%
-{G6}Время   : {w}{elapsed//3600:02d}:{elapsed%3600//60:02d}:{elapsed%60:02d}
-{G7}Данные  : {w}{t.bytes_sent/1024/1024:.1f} MB
+{G7}Цель      : {w}{url[:30]}
+{G6}Потоки    : {w}{threads}
+{G5}Запросы   : {w}{t.requests:,}
+{G4}Скорость  : {w}{rate:,} r/s
+{G3}Успешно   : {Green}{t.success:,}{Reset}
+{G2}Ошибки    : {Red}{t.errors:,}{Reset}
+{G1}Бан       : {Red}{t.banned}{Reset}
+{G5}Нагрузка  : {w}[{bar}] {load}%
+{G6}Время     : {w}{elapsed//3600:02d}:{elapsed%3600//60:02d}:{elapsed%60:02d}
+{G7}Данные    : {w}{t.bytes_sent/1024/1024:.1f} MB
 {G7}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-{G6}Всего атак  : {w}{total_attacks}
-{G6}Всего запросов: {w}{total_requests:,}
-{G6}Всего успешно: {w}{total_success:,}
-{G6}Всего ошибок : {w}{total_errors:,}
+{G6}Всего атак за сессию : {w}{total_attacks}
+{G6}Всего запросов       : {w}{total_requests:,}
+{G6}Всего успешно        : {Green}{total_success:,}{Reset}
+{G6}Всего ошибок         : {Red}{total_errors:,}{Reset}
 {G7}[Press ENTER to stop]
 {Reset}
 """)
@@ -607,13 +609,11 @@ class UI:
         
         threads = safe_int(f"{G7}Потоки (1-{CONFIG['max_threads']}): {w}", 100, 1, CONFIG['max_threads'])
         
-        # Анимация запуска ПОСЛЕ ввода цели и потоков
         launch_animation()
         
         t = LoadTester()
         task = asyncio.create_task(t.start_http(url, threads))
         
-        # Запускаем мониторинг атаки в реальном времени
         while t.running:
             self.attack_progress(url, threads, t, "HTTP")
             await asyncio.sleep(0.3)
@@ -643,9 +643,9 @@ class UI:
 {G7}АТАКА ЗАВЕРШЕНА
 
 {G7}Запросы: {w}{t.requests:,}
-{G6}Успешно: {w}{t.success:,}
-{G5}Ошибки : {w}{t.errors:,}
-{G4}Бан    : {w}{t.banned}
+{G6}Успешно: {Green}{t.success:,}{Reset}
+{G5}Ошибки : {Red}{t.errors:,}{Reset}
+{G4}Бан    : {Red}{t.banned}{Reset}
 {G3}Время  : {w}{elapsed} сек
 {G2}Скорость: {w}{int(t.requests/elapsed) if elapsed>0 else 0} r/s
 {G7}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -665,13 +665,11 @@ class UI:
         
         threads = safe_int(f"{G7}Потоки (1-{CONFIG['max_threads']}): {w}", 100, 1, CONFIG['max_threads'])
         
-        # Анимация запуска ПОСЛЕ ввода цели и потоков
         launch_animation()
         
         t = LoadTester()
         task = asyncio.create_task(t.start_tcp(url, threads))
         
-        # Запускаем мониторинг атаки в реальном времени
         while t.running:
             self.attack_progress(url, threads, t, "TCP")
             await asyncio.sleep(0.3)
@@ -701,9 +699,9 @@ class UI:
 {G7}АТАКА ЗАВЕРШЕНА
 
 {G7}Запросы: {w}{t.requests:,}
-{G6}Успешно: {w}{t.success:,}
-{G5}Ошибки : {w}{t.errors:,}
-{G4}Бан    : {w}{t.banned}
+{G6}Успешно: {Green}{t.success:,}{Reset}
+{G5}Ошибки : {Red}{t.errors:,}{Reset}
+{G4}Бан    : {Red}{t.banned}{Reset}
 {G3}Время  : {w}{elapsed} сек
 {G2}Скорость: {w}{int(t.requests/elapsed) if elapsed>0 else 0} r/s
 {G7}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
