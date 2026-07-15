@@ -39,7 +39,6 @@ g = "\033[1;32m"
 r = "\033[1;31m"
 w = "\033[0m"
 
-# ================= ТЁМНЫЕ ЗЕЛЁНЫЕ ОТТЕНКИ =================
 G1 = "\033[38;2;0;60;0m"
 G2 = "\033[38;2;0;90;0m"
 G3 = "\033[38;2;0;120;0m"
@@ -151,6 +150,23 @@ def safe_int(prompt, default=100, min_val=1, max_val=1000):
                 return v
         except:
             pass
+
+# ================= ПРОГРЕСС-БАР =================
+def draw_progress_bar(percent, width=30, color_start=G7, color_end=Red):
+    """Рисует прогресс-бар с цветным градиентом"""
+    filled = int(width * percent / 100)
+    empty = width - filled
+    
+    # Выбираем цвет в зависимости от процента
+    if percent < 30:
+        bar_color = Green
+    elif percent < 70:
+        bar_color = Yellow
+    else:
+        bar_color = Red
+    
+    bar = bar_color + '█' * filled + Reset + '░' * empty
+    return f"[{bar}] {percent}%"
 
 # ================= LOAD TESTER =================
 class LoadTester:
@@ -488,14 +504,12 @@ class UI:
     def attack_progress(self, url, threads, t, attack_type="HTTP"):
         elapsed = int(time.time() - t.start_time)
         rate = int(t.requests / elapsed) if elapsed > 0 else 0
-        load = min(100, int(rate / 15))
-        bar = '█' * (load // 2) + '░' * (50 - load // 2)
+        load = min(100, int((rate / 15) * 100) // 1)  # Более точный расчёт
+        
+        # Рисуем прогресс-бар
+        bar = draw_progress_bar(load)
         
         stats = load_stats()
-        total_attacks = stats['attacks']
-        total_success = stats['success']
-        total_errors = stats['errors']
-        total_requests = stats['requests']
         
         self.clear()
         self.header()
@@ -509,14 +523,14 @@ class UI:
 {G3}Успешно   : {Green}{t.success:,}{Reset}
 {G2}Ошибки    : {Red}{t.errors:,}{Reset}
 {G1}Бан       : {Red}{t.banned}{Reset}
-{G5}Нагрузка  : {w}[{bar}] {load}%
+{G5}Нагрузка  : {w}{bar}
 {G6}Время     : {w}{elapsed//3600:02d}:{elapsed%3600//60:02d}:{elapsed%60:02d}
 {G7}Данные    : {w}{t.bytes_sent/1024/1024:.1f} MB
 {G7}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-{G6}Всего атак за сессию : {w}{total_attacks}
-{G6}Всего запросов       : {w}{total_requests:,}
-{G6}Всего успешно        : {Green}{total_success:,}{Reset}
-{G6}Всего ошибок         : {Red}{total_errors:,}{Reset}
+{G6}Всего атак за сессию : {w}{stats['attacks']}
+{G6}Всего запросов       : {w}{stats['requests']:,}
+{G6}Всего успешно        : {Green}{stats['success']:,}{Reset}
+{G6}Всего ошибок         : {Red}{stats['errors']:,}{Reset}
 {G7}[Press ENTER to stop]
 {Reset}
 """)
