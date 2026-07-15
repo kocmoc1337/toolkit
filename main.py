@@ -54,31 +54,30 @@ class C:
     def rgb(r, g, b):
         return f"\033[38;2;{r};{g};{b}m"
     
-    NEON_PINK = rgb(255, 30, 220)
-    NEON_BLUE = rgb(0, 200, 255)
-    NEON_PURPLE = rgb(180, 0, 255)
+    # Зелёные оттенки (как на скриншоте)
+    GREEN_DARK = rgb(0, 80, 0)
+    GREEN_MID = rgb(0, 140, 0)
+    GREEN_LIGHT = rgb(0, 200, 0)
+    GREEN_LIGHT2 = rgb(50, 255, 50)
+    GREEN_MID2 = rgb(0, 180, 0)
+    GREEN_DARK2 = rgb(0, 100, 0)
+    
     NEON_GREEN = rgb(0, 255, 100)
 
-# ================= GLITCH =================
-class Glitch:
-    chars = ['█', '▓', '░', '▀', '▄', '╳', '✕', '◆', '●', '◈', '◉']
-    
-    @staticmethod
-    def text(text, intensity=2):
-        result = list(text)
-        for _ in range(intensity):
-            pos = random.randint(0, len(result) - 1)
-            result[pos] = random.choice(Glitch.chars)
-        return ''.join(result)
-    
-    @staticmethod
-    def scanlines(text):
-        lines = text.split('\n')
-        out = []
-        for line in lines:
-            out.append(line)
-            out.append(C.DIM + '░' * len(line) + C.RESET)
-        return '\n'.join(out)
+# ================= БАННЕР (ЗЕЛЁНЫЙ ГРАДИЕНТ) =================
+def banner():
+    print(f"""
+{C.GREEN_DARK} ██    ██  ██▓  ▄▄▄█████▓ ██▀███   ▄▄▄         ▓█████▄ ▓█████▄  ▒█████    ██████ {C.RESET}
+{C.GREEN_MID}  ██  ▓██▒▓██▒  ▓  ██▒ ▓▒▓██ ▒ ██▒▒████▄       ▒██▀ ██▌▒██▀ ██▌▒██▒  ██▒▒██    ▒ {C.RESET}
+{C.GREEN_LIGHT}  ▓██  ▒██░▒██░  ▒ ▓██░ ▒░▓██ ░▄█ ▒▒██  ▀█▄     ░██   █▌░██   █▌▒██░  ██▒░ ▓██▄   {C.RESET}
+{C.GREEN_LIGHT2}  ▓▓█  ░██░▒██░  ░ ▓██▓ ░ ▒██▀▀█▄  ░██▄▄▄▄██    ░▓█▄   ▌░▓█▄   ▌▒██   ██░  ▒   ██▒{C.RESET}
+{C.GREEN_MID2}  ▒▒█████▓ ░██████▒▒██▒ ░ ░██▓ ▒██▒ ▓█   ▓██▒   ░▒████▓ ░▒████▓ ░ ████▓▒░▒██████▒▒{C.RESET}
+{C.GREEN_DARK2}  ░▒▓▒ ▒ ▒ ░ ▒░▓  ░▒ ░░   ░ ▒▓ ░▒▓░ ▒▒   ▓▒█░    ▒▒▓  ▒  ▒▒▓  ▒ ░ ▒░▒░▒░ ▒ ▒▓▒ ▒ ░{C.RESET}
+{C.GREEN_DARK}  ░░▒░ ░ ░ ░ ░ ▒  ░  ░      ░▒ ░ ▒░  ▒   ▒▒ ░    ░ ▒  ▒  ░ ▒  ▒   ░ ▒ ▒░ ░ ░▒  ░ ░{C.RESET}
+{C.GREEN_MID}   ░░░ ░ ░   ░ ░   ░        ░░   ░   ░   ▒       ░ ░  ░  ░ ░  ░ ░ ░ ░ ▒  ░  ░  ░  {C.RESET}
+{C.GREEN_LIGHT}     ░         ░  ░          ░           ░  ░      ░       ░        ░ ░        ░  {C.RESET}
+{C.GREEN_LIGHT2}                                               ░       ░                           {C.RESET}
+""")
 
 # ================= КОНФИГ =================
 CONFIG = {
@@ -316,18 +315,18 @@ class UI:
             print(f"{C.NEON_GREEN}{row}{C.RESET}")
 
     def header(self):
+        banner()
         print(f"""
-{C.NEON_PINK}╔{'═' * 116}╗{C.RESET}
-{C.NEON_BLUE}║{C.RESET} {C.BOLD}{C.NEON_PINK}U{C.NEON_BLUE}L{C.NEON_PURPLE}T{C.NEON_GREEN}R{C.YELLOW}A{C.NEON_PINK} {C.NEON_BLUE}D{C.NEON_PURPLE}D{C.NEON_GREEN}O{C.YELLOW}S{C.RESET} {C.CYAN}////{C.RESET} {C.YELLOW}PHANTOM EDITION{C.RESET} {C.CYAN}////{C.RESET}{' ' * 44}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_BLUE}║{C.RESET} {C.DIM}[ErrorCode404] {datetime.now().strftime('%H:%M:%S')} | Status: {C.NEON_GREEN}● ONLINE{C.RESET}{' ' * 85}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_PINK}╠{'═' * 116}╣{C.RESET}
+{C.GREEN_LIGHT2}╔{'═' * 116}╗{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET} {C.DIM}[ErrorCode404] {datetime.now().strftime('%H:%M:%S')} | Status: {C.GREEN_LIGHT}● ONLINE{C.RESET}{' ' * 85}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_MID}╠{'═' * 116}╣{C.RESET}
 """)
 
     def footer(self):
         print(f"""
-{C.NEON_PINK}╠{'═' * 116}╣{C.RESET}
-{C.NEON_BLUE}║{C.RESET} {C.DIM}v5.0 | by @jecrs | verificator | Neural Link: ACTIVE | Firewall: ENABLED{C.RESET}{' ' * 33}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_PINK}╚{'═' * 116}╝{C.RESET}
+{C.GREEN_MID}╠{'═' * 116}╣{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET} {C.DIM}v5.0 | by @jecrs | verificator | Neural Link: ACTIVE | Firewall: ENABLED{C.RESET}{' ' * 33}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_DARK}╚{'═' * 116}╝{C.RESET}
 """)
 
     def main_menu(self):
@@ -335,18 +334,18 @@ class UI:
         self.matrix_rain(2)
         self.header()
         print(f"""
-{C.NEON_PURPLE}║{C.RESET}  {C.BOLD}{C.CYAN}[MAIN MENU]{C.RESET}{' ' * 106}{C.NEON_PURPLE}║{C.RESET}
-{C.NEON_PURPLE}║{C.RESET}{' ' * 116}{C.NEON_PURPLE}║{C.RESET}
-{C.NEON_PURPLE}║{C.RESET}  {C.NEON_GREEN}➤ [1]{C.RESET} HTTP Load Test            {C.DIM}| HTTP/HTTPS нагрузка{C.RESET}{' ' * 55}{C.NEON_PURPLE}║{C.RESET}
-{C.NEON_PURPLE}║{C.RESET}  {C.NEON_BLUE}➤ [2]{C.RESET} TCP Load Test             {C.DIM}| TCP нагрузка{C.RESET}{' ' * 68}{C.NEON_PURPLE}║{C.RESET}
-{C.NEON_PURPLE}║{C.RESET}  {C.YELLOW}➤ [3]{C.RESET} View Logs                 {C.DIM}| Логи тестов{C.RESET}{' ' * 70}{C.NEON_PURPLE}║{C.RESET}
-{C.NEON_PURPLE}║{C.RESET}  {C.MAGENTA}➤ [4]{C.RESET} Proxy Management          {C.DIM}| Управление прокси{C.RESET}{' ' * 58}{C.NEON_PURPLE}║{C.RESET}
-{C.NEON_PURPLE}║{C.RESET}  {C.CYAN}➤ [5]{C.RESET} Total Statistics           {C.DIM}| Общая статистика{C.RESET}{' ' * 59}{C.NEON_PURPLE}║{C.RESET}
-{C.NEON_PURPLE}║{C.RESET}  {C.NEON_GREEN}➤ [6]{C.RESET} History                  {C.DIM}| История тестов{C.RESET}{' ' * 68}{C.NEON_PURPLE}║{C.RESET}
-{C.NEON_PURPLE}║{C.RESET}  {C.RED}➤ [7]{C.RESET} Settings                  {C.DIM}| Настройки{C.RESET}{' ' * 74}{C.NEON_PURPLE}║{C.RESET}
-{C.NEON_PURPLE}║{C.RESET}  {C.NEON_BLUE}➤ [8]{C.RESET} INFO                     {C.DIM}| Инструкция{C.RESET}{' ' * 71}{C.NEON_PURPLE}║{C.RESET}
-{C.NEON_PURPLE}║{C.RESET}{' ' * 116}{C.NEON_PURPLE}║{C.RESET}
-{C.NEON_PURPLE}║{C.RESET}  {C.RED}[X]{C.RESET} EXIT                      {C.DIM}| Выход{C.RESET}{' ' * 85}{C.NEON_PURPLE}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}  {C.BOLD}{C.GREEN_LIGHT2}[MAIN MENU]{C.RESET}{' ' * 106}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}  {C.GREEN_LIGHT2}➤ [1]{C.RESET} HTTP Load Test            {C.DIM}| HTTP/HTTPS нагрузка{C.RESET}{' ' * 55}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}  {C.GREEN_MID}➤ [2]{C.RESET} TCP Load Test             {C.DIM}| TCP нагрузка{C.RESET}{' ' * 68}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}  {C.GREEN_DARK2}➤ [3]{C.RESET} View Logs                 {C.DIM}| Логи тестов{C.RESET}{' ' * 70}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}  {C.GREEN_MID2}➤ [4]{C.RESET} Proxy Management          {C.DIM}| Управление прокси{C.RESET}{' ' * 58}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}  {C.GREEN_LIGHT}➤ [5]{C.RESET} Total Statistics           {C.DIM}| Общая статистика{C.RESET}{' ' * 59}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}  {C.GREEN_LIGHT2}➤ [6]{C.RESET} History                  {C.DIM}| История тестов{C.RESET}{' ' * 68}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}  {C.GREEN_DARK}➤ [7]{C.RESET} Settings                  {C.DIM}| Настройки{C.RESET}{' ' * 74}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}  {C.GREEN_MID}➤ [8]{C.RESET} INFO                     {C.DIM}| Инструкция{C.RESET}{' ' * 71}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}  {C.RED}[X]{C.RESET} EXIT                      {C.DIM}| Выход{C.RESET}{' ' * 85}{C.GREEN_LIGHT}║{C.RESET}
 """)
         self.footer()
 
@@ -355,30 +354,30 @@ class UI:
         self.matrix_rain(1)
         self.header()
         print(f"""
-{C.NEON_BLUE}║{C.RESET}  {C.BOLD}{C.CYAN}[INSTRUCTIONS]{C.RESET}{' ' * 105}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_BLUE}║{C.RESET}{' ' * 116}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_BLUE}║{C.RESET}  {C.NEON_GREEN}■ HTTP Load Test{C.RESET}{' ' * 96}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_BLUE}║{C.RESET}    └─ Запускает HTTP/HTTPS нагрузку на указанный URL/IP{C.RESET}{' ' * 54}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_BLUE}║{C.RESET}{' ' * 116}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_BLUE}║{C.RESET}  {C.MAGENTA}■ TCP Load Test{C.RESET}{' ' * 98}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_BLUE}║{C.RESET}    └─ Запускает TCP нагрузку на указанный URL{C.RESET}{' ' * 69}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_BLUE}║{C.RESET}{' ' * 116}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_BLUE}║{C.RESET}  {C.YELLOW}■ View Logs{C.RESET}{' ' * 102}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_BLUE}║{C.RESET}    └─ Показывает общую статистику всех тестов{C.RESET}{' ' * 64}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_BLUE}║{C.RESET}{' ' * 116}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_BLUE}║{C.RESET}  {C.CYAN}■ Proxy Management{C.RESET}{' ' * 94}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_BLUE}║{C.RESET}    └─ Добавление, удаление и проверка прокси{C.RESET}{' ' * 62}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_BLUE}║{C.RESET}{' ' * 116}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_BLUE}║{C.RESET}  {C.NEON_GREEN}■ Total Statistics{C.RESET}{' ' * 94}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_BLUE}║{C.RESET}    └─ Суммарная статистика по всем тестам{C.RESET}{' ' * 66}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_BLUE}║{C.RESET}{' ' * 116}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_BLUE}║{C.RESET}  {C.MAGENTA}■ History{C.RESET}{' ' * 104}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_BLUE}║{C.RESET}    └─ Последние 100 проведённых тестов{C.RESET}{' ' * 67}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_BLUE}║{C.RESET}{' ' * 116}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_BLUE}║{C.RESET}  {C.NEON_BLUE}■ Settings{C.RESET}{' ' * 104}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_BLUE}║{C.RESET}    └─ Настройка потоков, таймаута и ротации прокси{C.RESET}{' ' * 54}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_BLUE}║{C.RESET}{' ' * 116}{C.NEON_BLUE}║{C.RESET}
-{C.NEON_BLUE}║{C.RESET}  {C.BOLD}[BACK]{C.RESET} Return to Main Menu{' ' * 89}{C.NEON_BLUE}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}  {C.BOLD}{C.GREEN_LIGHT}[INSTRUCTIONS]{C.RESET}{' ' * 105}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}  {C.GREEN_LIGHT}■ HTTP Load Test{C.RESET}{' ' * 96}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}    └─ Запускает HTTP/HTTPS нагрузку на указанный URL/IP{C.RESET}{' ' * 54}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}  {C.GREEN_MID}■ TCP Load Test{C.RESET}{' ' * 98}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}    └─ Запускает TCP нагрузку на указанный URL{C.RESET}{' ' * 69}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}  {C.GREEN_DARK2}■ View Logs{C.RESET}{' ' * 102}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}    └─ Показывает общую статистику всех тестов{C.RESET}{' ' * 64}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}  {C.GREEN_MID2}■ Proxy Management{C.RESET}{' ' * 94}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}    └─ Добавление, удаление и проверка прокси{C.RESET}{' ' * 62}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}  {C.GREEN_LIGHT}■ Total Statistics{C.RESET}{' ' * 94}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}    └─ Суммарная статистика по всем тестам{C.RESET}{' ' * 66}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}  {C.GREEN_MID}■ History{C.RESET}{' ' * 104}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}    └─ Последние 100 проведённых тестов{C.RESET}{' ' * 67}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}  {C.GREEN_DARK}■ Settings{C.RESET}{' ' * 104}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}    └─ Настройка потоков, таймаута и ротации прокси{C.RESET}{' ' * 54}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}  {C.BOLD}[BACK]{C.RESET} Return to Main Menu{' ' * 89}{C.GREEN_LIGHT2}║{C.RESET}
 """)
         self.footer()
 
@@ -387,19 +386,19 @@ class UI:
         self.matrix_rain(1)
         self.header()
         print(f"""
-{C.MAGENTA}║{C.RESET}  {C.BOLD}{C.CYAN}[SETTINGS]{C.RESET}{' ' * 107}{C.MAGENTA}║{C.RESET}
-{C.MAGENTA}║{C.RESET}{' ' * 116}{C.MAGENTA}║{C.RESET}
-{C.MAGENTA}║{C.RESET}  {C.NEON_GREEN}■ Max Threads :{C.RESET} {C.WHITE}{CONFIG['max_threads']}{C.RESET}{' ' * 98}{C.MAGENTA}║{C.RESET}
-{C.MAGENTA}║{C.RESET}  {C.NEON_BLUE}■ Timeout     :{C.RESET} {C.WHITE}{CONFIG['timeout']}s{C.RESET}{' ' * 103}{C.MAGENTA}║{C.RESET}
-{C.MAGENTA}║{C.RESET}  {C.YELLOW}■ Max Duration:{C.RESET} {C.WHITE}{CONFIG['max_duration']}s{C.RESET}{' ' * 97}{C.MAGENTA}║{C.RESET}
-{C.MAGENTA}║{C.RESET}  {C.CYAN}■ Proxy Rot.  :{C.RESET} {C.WHITE}{CONFIG['proxy_rotation_interval']}{C.RESET}{' ' * 90}{C.MAGENTA}║{C.RESET}
-{C.MAGENTA}║{C.RESET}{' ' * 116}{C.MAGENTA}║{C.RESET}
-{C.MAGENTA}║{C.RESET}  {C.NEON_GREEN}[1]{C.RESET} Edit Max Threads{' ' * 83}{C.MAGENTA}║{C.RESET}
-{C.MAGENTA}║{C.RESET}  {C.NEON_BLUE}[2]{C.RESET} Edit Timeout{' ' * 89}{C.MAGENTA}║{C.RESET}
-{C.MAGENTA}║{C.RESET}  {C.YELLOW}[3]{C.RESET} Edit Max Duration{' ' * 82}{C.MAGENTA}║{C.RESET}
-{C.MAGENTA}║{C.RESET}  {C.CYAN}[4]{C.RESET} Edit Proxy Rotation{' ' * 78}{C.MAGENTA}║{C.RESET}
-{C.MAGENTA}║{C.RESET}{' ' * 116}{C.MAGENTA}║{C.RESET}
-{C.MAGENTA}║{C.RESET}  {C.BOLD}[BACK]{C.RESET} Return to Main Menu{' ' * 89}{C.MAGENTA}║{C.RESET}
+{C.GREEN_MID}║{C.RESET}  {C.BOLD}{C.GREEN_LIGHT2}[SETTINGS]{C.RESET}{' ' * 107}{C.GREEN_MID}║{C.RESET}
+{C.GREEN_MID}║{C.RESET}{' ' * 116}{C.GREEN_MID}║{C.RESET}
+{C.GREEN_MID}║{C.RESET}  {C.GREEN_LIGHT}■ Max Threads :{C.RESET} {C.WHITE}{CONFIG['max_threads']}{C.RESET}{' ' * 98}{C.GREEN_MID}║{C.RESET}
+{C.GREEN_MID}║{C.RESET}  {C.GREEN_MID2}■ Timeout     :{C.RESET} {C.WHITE}{CONFIG['timeout']}s{C.RESET}{' ' * 103}{C.GREEN_MID}║{C.RESET}
+{C.GREEN_MID}║{C.RESET}  {C.GREEN_DARK2}■ Max Duration:{C.RESET} {C.WHITE}{CONFIG['max_duration']}s{C.RESET}{' ' * 97}{C.GREEN_MID}║{C.RESET}
+{C.GREEN_MID}║{C.RESET}  {C.GREEN_DARK}■ Proxy Rot.  :{C.RESET} {C.WHITE}{CONFIG['proxy_rotation_interval']}{C.RESET}{' ' * 90}{C.GREEN_MID}║{C.RESET}
+{C.GREEN_MID}║{C.RESET}{' ' * 116}{C.GREEN_MID}║{C.RESET}
+{C.GREEN_MID}║{C.RESET}  {C.GREEN_LIGHT}[1]{C.RESET} Edit Max Threads{' ' * 83}{C.GREEN_MID}║{C.RESET}
+{C.GREEN_MID}║{C.RESET}  {C.GREEN_MID2}[2]{C.RESET} Edit Timeout{' ' * 89}{C.GREEN_MID}║{C.RESET}
+{C.GREEN_MID}║{C.RESET}  {C.GREEN_DARK2}[3]{C.RESET} Edit Max Duration{' ' * 82}{C.GREEN_MID}║{C.RESET}
+{C.GREEN_MID}║{C.RESET}  {C.GREEN_DARK}[4]{C.RESET} Edit Proxy Rotation{' ' * 78}{C.GREEN_MID}║{C.RESET}
+{C.GREEN_MID}║{C.RESET}{' ' * 116}{C.GREEN_MID}║{C.RESET}
+{C.GREEN_MID}║{C.RESET}  {C.BOLD}[BACK]{C.RESET} Return to Main Menu{' ' * 89}{C.GREEN_MID}║{C.RESET}
 """)
         self.footer()
 
@@ -409,20 +408,20 @@ class UI:
         self.header()
         h = load_history()
         print(f"""
-{C.CYAN}║{C.RESET}  {C.BOLD}{C.NEON_GREEN}[HISTORY - LAST 10]{C.RESET}{' ' * 96}{C.CYAN}║{C.RESET}
-{C.CYAN}║{C.RESET}{' ' * 116}{C.CYAN}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}  {C.BOLD}{C.GREEN_LIGHT2}[HISTORY - LAST 10]{C.RESET}{' ' * 96}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT}║{C.RESET}
 """)
         if not h:
-            print(f"{C.CYAN}║{C.RESET}  {C.DIM}No records found{' ' * 97}{C.CYAN}║{C.RESET}")
+            print(f"{C.GREEN_LIGHT}║{C.RESET}  {C.DIM}No records found{' ' * 97}{C.GREEN_LIGHT}║{C.RESET}")
         else:
             for i, e in enumerate(h[-10:], 1):
                 t = e.get('target', 'N/A')[:25]
                 r = e.get('requests', 0)
                 ts = e.get('timestamp', '')[:16]
-                print(f"{C.CYAN}║{C.RESET}  {C.NEON_GREEN}{i}.{C.RESET} {C.WHITE}{t:<25}{C.RESET} {C.YELLOW}{r} req{C.RESET} {C.DIM}{ts}{C.RESET}{' ' * (116 - 4 - 25 - len(str(r)) - len(ts) - 10)}{C.CYAN}║{C.RESET}")
+                print(f"{C.GREEN_LIGHT}║{C.RESET}  {C.GREEN_LIGHT2}{i}.{C.RESET} {C.WHITE}{t:<25}{C.RESET} {C.GREEN_MID}{r} req{C.RESET} {C.DIM}{ts}{C.RESET}{' ' * (116 - 4 - 25 - len(str(r)) - len(ts) - 10)}{C.GREEN_LIGHT}║{C.RESET}")
         print(f"""
-{C.CYAN}║{C.RESET}{' ' * 116}{C.CYAN}║{C.RESET}
-{C.CYAN}║{C.RESET}  {C.BOLD}[BACK]{C.RESET} Return to Main Menu{' ' * 89}{C.CYAN}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}  {C.BOLD}[BACK]{C.RESET} Return to Main Menu{' ' * 89}{C.GREEN_LIGHT}║{C.RESET}
 """)
         self.footer()
 
@@ -432,14 +431,14 @@ class UI:
         self.header()
         s = load_stats()
         print(f"""
-{C.NEON_GREEN}║{C.RESET}  {C.BOLD}{C.CYAN}[TOTAL STATISTICS]{C.RESET}{' ' * 98}{C.NEON_GREEN}║{C.RESET}
-{C.NEON_GREEN}║{C.RESET}{' ' * 116}{C.NEON_GREEN}║{C.RESET}
-{C.NEON_GREEN}║{C.RESET}  Attacks : {C.WHITE}{s['attacks']}{C.RESET}{' ' * 98}{C.NEON_GREEN}║{C.RESET}
-{C.NEON_GREEN}║{C.RESET}  Requests: {C.WHITE}{s['requests']:,}{C.RESET}{' ' * 89}{C.NEON_GREEN}║{C.RESET}
-{C.NEON_GREEN}║{C.RESET}  Success : {C.WHITE}{s['success']:,}{C.RESET}{' ' * 90}{C.NEON_GREEN}║{C.RESET}
-{C.NEON_GREEN}║{C.RESET}  Errors  : {C.WHITE}{s['errors']:,}{C.RESET}{' ' * 90}{C.NEON_GREEN}║{C.RESET}
-{C.NEON_GREEN}║{C.RESET}{' ' * 116}{C.NEON_GREEN}║{C.RESET}
-{C.NEON_GREEN}║{C.RESET}  {C.BOLD}[BACK]{C.RESET} Return to Main Menu{' ' * 89}{C.NEON_GREEN}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}  {C.BOLD}{C.GREEN_LIGHT}[TOTAL STATISTICS]{C.RESET}{' ' * 98}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}  Attacks : {C.WHITE}{s['attacks']}{C.RESET}{' ' * 98}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}  Requests: {C.WHITE}{s['requests']:,}{C.RESET}{' ' * 89}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}  Success : {C.WHITE}{s['success']:,}{C.RESET}{' ' * 90}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}  Errors  : {C.WHITE}{s['errors']:,}{C.RESET}{' ' * 90}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT2}║{C.RESET}
+{C.GREEN_LIGHT2}║{C.RESET}  {C.BOLD}[BACK]{C.RESET} Return to Main Menu{' ' * 89}{C.GREEN_LIGHT2}║{C.RESET}
 """)
         self.footer()
 
@@ -449,14 +448,14 @@ class UI:
         self.header()
         s = load_stats()
         print(f"""
-{C.YELLOW}║{C.RESET}  {C.BOLD}{C.CYAN}[SYSTEM LOGS]{C.RESET}{' ' * 103}{C.YELLOW}║{C.RESET}
-{C.YELLOW}║{C.RESET}{' ' * 116}{C.YELLOW}║{C.RESET}
-{C.YELLOW}║{C.RESET}  Total Attacks: {C.WHITE}{s['attacks']}{C.RESET}{' ' * 98}{C.YELLOW}║{C.RESET}
-{C.YELLOW}║{C.RESET}  Total Requests: {C.WHITE}{s['requests']:,}{C.RESET}{' ' * 89}{C.YELLOW}║{C.RESET}
-{C.YELLOW}║{C.RESET}  Total Success : {C.WHITE}{s['success']:,}{C.RESET}{' ' * 89}{C.YELLOW}║{C.RESET}
-{C.YELLOW}║{C.RESET}  Total Errors  : {C.WHITE}{s['errors']:,}{C.RESET}{' ' * 89}{C.YELLOW}║{C.RESET}
-{C.YELLOW}║{C.RESET}{' ' * 116}{C.YELLOW}║{C.RESET}
-{C.YELLOW}║{C.RESET}  {C.BOLD}[BACK]{C.RESET} Return to Main Menu{' ' * 89}{C.YELLOW}║{C.RESET}
+{C.GREEN_DARK2}║{C.RESET}  {C.BOLD}{C.GREEN_LIGHT2}[SYSTEM LOGS]{C.RESET}{' ' * 103}{C.GREEN_DARK2}║{C.RESET}
+{C.GREEN_DARK2}║{C.RESET}{' ' * 116}{C.GREEN_DARK2}║{C.RESET}
+{C.GREEN_DARK2}║{C.RESET}  Total Attacks: {C.WHITE}{s['attacks']}{C.RESET}{' ' * 98}{C.GREEN_DARK2}║{C.RESET}
+{C.GREEN_DARK2}║{C.RESET}  Total Requests: {C.WHITE}{s['requests']:,}{C.RESET}{' ' * 89}{C.GREEN_DARK2}║{C.RESET}
+{C.GREEN_DARK2}║{C.RESET}  Total Success : {C.WHITE}{s['success']:,}{C.RESET}{' ' * 89}{C.GREEN_DARK2}║{C.RESET}
+{C.GREEN_DARK2}║{C.RESET}  Total Errors  : {C.WHITE}{s['errors']:,}{C.RESET}{' ' * 89}{C.GREEN_DARK2}║{C.RESET}
+{C.GREEN_DARK2}║{C.RESET}{' ' * 116}{C.GREEN_DARK2}║{C.RESET}
+{C.GREEN_DARK2}║{C.RESET}  {C.BOLD}[BACK]{C.RESET} Return to Main Menu{' ' * 89}{C.GREEN_DARK2}║{C.RESET}
 """)
         self.footer()
 
@@ -470,15 +469,15 @@ class UI:
         except:
             proxies = []
         print(f"""
-{C.MAGENTA}║{C.RESET}  {C.BOLD}{C.CYAN}[PROXY MANAGEMENT]{C.RESET}{' ' * 96}{C.MAGENTA}║{C.RESET}
-{C.MAGENTA}║{C.RESET}{' ' * 116}{C.MAGENTA}║{C.RESET}
-{C.MAGENTA}║{C.RESET}  {C.NEON_GREEN}[1]{C.RESET} Add proxy manually{' ' * 82}{C.MAGENTA}║{C.RESET}
-{C.MAGENTA}║{C.RESET}  {C.NEON_BLUE}[2]{C.RESET} Load from file{' ' * 84}{C.MAGENTA}║{C.RESET}
-{C.MAGENTA}║{C.RESET}  {C.YELLOW}[3]{C.RESET} Show list ({len(proxies)}){' ' * 76}{C.MAGENTA}║{C.RESET}
-{C.MAGENTA}║{C.RESET}  {C.CYAN}[4]{C.RESET} Clear list{' ' * 89}{C.MAGENTA}║{C.RESET}
-{C.MAGENTA}║{C.RESET}  {C.NEON_GREEN}[5]{C.RESET} Check all{' ' * 86}{C.MAGENTA}║{C.RESET}
-{C.MAGENTA}║{C.RESET}{' ' * 116}{C.MAGENTA}║{C.RESET}
-{C.MAGENTA}║{C.RESET}  {C.BOLD}[BACK]{C.RESET} Return to Main Menu{' ' * 89}{C.MAGENTA}║{C.RESET}
+{C.GREEN_MID2}║{C.RESET}  {C.BOLD}{C.GREEN_LIGHT2}[PROXY MANAGEMENT]{C.RESET}{' ' * 96}{C.GREEN_MID2}║{C.RESET}
+{C.GREEN_MID2}║{C.RESET}{' ' * 116}{C.GREEN_MID2}║{C.RESET}
+{C.GREEN_MID2}║{C.RESET}  {C.GREEN_LIGHT}[1]{C.RESET} Add proxy manually{' ' * 82}{C.GREEN_MID2}║{C.RESET}
+{C.GREEN_MID2}║{C.RESET}  {C.GREEN_MID2}[2]{C.RESET} Load from file{' ' * 84}{C.GREEN_MID2}║{C.RESET}
+{C.GREEN_MID2}║{C.RESET}  {C.GREEN_DARK2}[3]{C.RESET} Show list ({len(proxies)}){' ' * 76}{C.GREEN_MID2}║{C.RESET}
+{C.GREEN_MID2}║{C.RESET}  {C.GREEN_DARK}[4]{C.RESET} Clear list{' ' * 89}{C.GREEN_MID2}║{C.RESET}
+{C.GREEN_MID2}║{C.RESET}  {C.GREEN_LIGHT2}[5]{C.RESET} Check all{' ' * 86}{C.GREEN_MID2}║{C.RESET}
+{C.GREEN_MID2}║{C.RESET}{' ' * 116}{C.GREEN_MID2}║{C.RESET}
+{C.GREEN_MID2}║{C.RESET}  {C.BOLD}[BACK]{C.RESET} Return to Main Menu{' ' * 89}{C.GREEN_MID2}║{C.RESET}
 """)
         self.footer()
 
@@ -492,20 +491,20 @@ class UI:
         self.matrix_rain(1)
         self.header()
         print(f"""
-{C.CYAN}║{C.RESET}  {C.BOLD}{C.NEON_GREEN}[ATTACK IN PROGRESS]{C.RESET}{' ' * 93}{C.CYAN}║{C.RESET}
-{C.CYAN}║{C.RESET}{' ' * 116}{C.CYAN}║{C.RESET}
-{C.CYAN}║{C.RESET}  Target : {C.WHITE}{url[:30]}{C.RESET}{' ' * 84}{C.CYAN}║{C.RESET}
-{C.CYAN}║{C.RESET}  Threads: {C.WHITE}{threads}{C.RESET}{' ' * 88}{C.CYAN}║{C.RESET}
-{C.CYAN}║{C.RESET}  Req    : {C.WHITE}{t.requests:,}{C.RESET}{' ' * 90}{C.CYAN}║{C.RESET}
-{C.CYAN}║{C.RESET}  Rate   : {C.WHITE}{rate:,} r/s{C.RESET}{' ' * 84}{C.CYAN}║{C.RESET}
-{C.CYAN}║{C.RESET}  OK     : {C.WHITE}{t.success:,}{C.RESET}{' ' * 91}{C.CYAN}║{C.RESET}
-{C.CYAN}║{C.RESET}  ERR    : {C.WHITE}{t.errors:,}{C.RESET}{' ' * 91}{C.CYAN}║{C.RESET}
-{C.CYAN}║{C.RESET}  BAN    : {C.WHITE}{t.banned}{C.RESET}{' ' * 91}{C.CYAN}║{C.RESET}
-{C.CYAN}║{C.RESET}  Load   : {C.WHITE}[{bar}] {load}%{C.RESET}{' ' * 90}{C.CYAN}║{C.RESET}
-{C.CYAN}║{C.RESET}  Time   : {C.WHITE}{elapsed//3600:02d}:{elapsed%3600//60:02d}:{elapsed%60:02d}{C.RESET}{' ' * 84}{C.CYAN}║{C.RESET}
-{C.CYAN}║{C.RESET}  Data   : {C.WHITE}{t.bytes_sent/1024/1024:.1f} MB{C.RESET}{' ' * 85}{C.CYAN}║{C.RESET}
-{C.CYAN}║{C.RESET}{' ' * 116}{C.CYAN}║{C.RESET}
-{C.CYAN}║{C.RESET}  {C.YELLOW}[Press ENTER to stop]{C.RESET}{' ' * 87}{C.CYAN}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}  {C.BOLD}{C.GREEN_LIGHT2}[ATTACK IN PROGRESS]{C.RESET}{' ' * 93}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}  Target : {C.WHITE}{url[:30]}{C.RESET}{' ' * 84}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}  Threads: {C.WHITE}{threads}{C.RESET}{' ' * 88}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}  Req    : {C.WHITE}{t.requests:,}{C.RESET}{' ' * 90}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}  Rate   : {C.WHITE}{rate:,} r/s{C.RESET}{' ' * 84}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}  OK     : {C.WHITE}{t.success:,}{C.RESET}{' ' * 91}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}  ERR    : {C.WHITE}{t.errors:,}{C.RESET}{' ' * 91}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}  BAN    : {C.WHITE}{t.banned}{C.RESET}{' ' * 91}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}  Load   : {C.WHITE}[{bar}] {load}%{C.RESET}{' ' * 90}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}  Time   : {C.WHITE}{elapsed//3600:02d}:{elapsed%3600//60:02d}:{elapsed%60:02d}{C.RESET}{' ' * 84}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}  Data   : {C.WHITE}{t.bytes_sent/1024/1024:.1f} MB{C.RESET}{' ' * 85}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}{' ' * 116}{C.GREEN_LIGHT}║{C.RESET}
+{C.GREEN_LIGHT}║{C.RESET}  {C.YELLOW}[Press ENTER to stop]{C.RESET}{' ' * 87}{C.GREEN_LIGHT}║{C.RESET}
 """)
         self.footer()
 
@@ -562,25 +561,25 @@ class UI:
                 if p:
                     with open('proxies.txt', 'a') as f:
                         f.write(p + '\n')
-                    print(f"{C.NEON_GREEN}[OK] Добавлен{C.RESET}")
+                    print(f"{C.GREEN_LIGHT2}[OK] Добавлен{C.RESET}")
             elif choice == '2':
                 try:
                     with open('proxies.txt', 'r') as f:
                         cnt = len([l for l in f if l.strip()])
-                    print(f"{C.NEON_GREEN}[OK] Загружено {cnt}{C.RESET}")
+                    print(f"{C.GREEN_LIGHT2}[OK] Загружено {cnt}{C.RESET}")
                 except:
                     print(f"{C.RED}[!] Файл не найден{C.RESET}")
             elif choice == '3':
                 if proxies:
-                    print(f"\n{C.CYAN}List:{C.RESET}")
+                    print(f"\n{C.GREEN_LIGHT2}List:{C.RESET}")
                     for i, p in enumerate(proxies, 1):
-                        print(f"{C.CYAN}{i}. {C.WHITE}{p}{C.RESET}")
+                        print(f"{C.GREEN_LIGHT2}{i}. {C.WHITE}{p}{C.RESET}")
                 else:
                     print(f"{C.YELLOW}[!] Пусто{C.RESET}")
                 input(f"{C.CYAN}Press ENTER...{C.RESET}")
             elif choice == '4':
                 open('proxies.txt', 'w').close()
-                print(f"{C.NEON_GREEN}[OK] Очищено{C.RESET}")
+                print(f"{C.GREEN_LIGHT2}[OK] Очищено{C.RESET}")
             elif choice == '5':
                 print(f"{C.YELLOW}[!] Проверка...{C.RESET}")
                 async def check():
@@ -593,22 +592,22 @@ class UI:
                     valid = asyncio.run(check())
                     with open('proxies.txt', 'w') as f:
                         f.write('\n'.join(valid))
-                    print(f"{C.NEON_GREEN}[OK] Работает: {len(valid)}/{len(proxies)}{C.RESET}")
+                    print(f"{C.GREEN_LIGHT2}[OK] Работает: {len(valid)}/{len(proxies)}{C.RESET}")
                 time.sleep(1)
 
     async def http_test(self):
         self.clear()
         self.matrix_rain(1)
         self.header()
-        print(f"{C.CYAN}║{C.RESET}  {C.BOLD}{C.NEON_GREEN}[HTTP LOAD TEST]{C.RESET}{' ' * 96}{C.CYAN}║{C.RESET}")
-        print(f"{C.CYAN}║{C.RESET}  Type: HTTP/HTTPS Flood{' ' * 79}{C.CYAN}║{C.RESET}")
+        print(f"{C.GREEN_LIGHT}║{C.RESET}  {C.BOLD}{C.GREEN_LIGHT2}[HTTP LOAD TEST]{C.RESET}{' ' * 96}{C.GREEN_LIGHT}║{C.RESET}")
+        print(f"{C.GREEN_LIGHT}║{C.RESET}  Type: HTTP/HTTPS Flood{' ' * 79}{C.GREEN_LIGHT}║{C.RESET}")
         self.footer()
         
-        url = input(f"\n{C.CYAN}Target IP: {C.WHITE}")
+        url = input(f"\n{C.GREEN_LIGHT2}Target IP: {C.WHITE}")
         if not url.startswith('http'):
             url = 'http://' + url
         
-        threads = safe_int(f"{C.CYAN}Threads (1-{CONFIG['max_threads']}): {C.WHITE}", 100, 1, CONFIG['max_threads'])
+        threads = safe_int(f"{C.GREEN_LIGHT2}Threads (1-{CONFIG['max_threads']}): {C.WHITE}", 100, 1, CONFIG['max_threads'])
         
         t = LoadTester()
         task = asyncio.create_task(t.start_http(url, threads))
@@ -639,29 +638,29 @@ class UI:
         self.clear()
         self.matrix_rain(1)
         self.header()
-        print(f"{C.CYAN}║{C.RESET}  {C.BOLD}{C.NEON_GREEN}[ATTACK FINISHED]{C.RESET}{' ' * 96}{C.CYAN}║{C.RESET}")
-        print(f"{C.CYAN}║{C.RESET}  Requests: {C.WHITE}{t.requests:,}{C.RESET}{' ' * 87}{C.CYAN}║{C.RESET}")
-        print(f"{C.CYAN}║{C.RESET}  Success : {C.WHITE}{t.success:,}{C.RESET}{' ' * 88}{C.CYAN}║{C.RESET}")
-        print(f"{C.CYAN}║{C.RESET}  Errors  : {C.WHITE}{t.errors:,}{C.RESET}{' ' * 88}{C.CYAN}║{C.RESET}")
-        print(f"{C.CYAN}║{C.RESET}  Banned  : {C.WHITE}{t.banned}{C.RESET}{' ' * 89}{C.CYAN}║{C.RESET}")
-        print(f"{C.CYAN}║{C.RESET}  Duration: {C.WHITE}{elapsed}s{C.RESET}{' ' * 86}{C.CYAN}║{C.RESET}")
-        print(f"{C.CYAN}║{C.RESET}  Avg Rate: {C.WHITE}{int(t.requests/elapsed) if elapsed>0 else 0} r/s{C.RESET}{' ' * 82}{C.CYAN}║{C.RESET}")
+        print(f"{C.GREEN_LIGHT}║{C.RESET}  {C.BOLD}{C.GREEN_LIGHT2}[ATTACK FINISHED]{C.RESET}{' ' * 96}{C.GREEN_LIGHT}║{C.RESET}")
+        print(f"{C.GREEN_LIGHT}║{C.RESET}  Requests: {C.WHITE}{t.requests:,}{C.RESET}{' ' * 87}{C.GREEN_LIGHT}║{C.RESET}")
+        print(f"{C.GREEN_LIGHT}║{C.RESET}  Success : {C.WHITE}{t.success:,}{C.RESET}{' ' * 88}{C.GREEN_LIGHT}║{C.RESET}")
+        print(f"{C.GREEN_LIGHT}║{C.RESET}  Errors  : {C.WHITE}{t.errors:,}{C.RESET}{' ' * 88}{C.GREEN_LIGHT}║{C.RESET}")
+        print(f"{C.GREEN_LIGHT}║{C.RESET}  Banned  : {C.WHITE}{t.banned}{C.RESET}{' ' * 89}{C.GREEN_LIGHT}║{C.RESET}")
+        print(f"{C.GREEN_LIGHT}║{C.RESET}  Duration: {C.WHITE}{elapsed}s{C.RESET}{' ' * 86}{C.GREEN_LIGHT}║{C.RESET}")
+        print(f"{C.GREEN_LIGHT}║{C.RESET}  Avg Rate: {C.WHITE}{int(t.requests/elapsed) if elapsed>0 else 0} r/s{C.RESET}{' ' * 82}{C.GREEN_LIGHT}║{C.RESET}")
         self.footer()
-        input(f"\n{C.CYAN}Press ENTER...{C.RESET}")
+        input(f"\n{C.GREEN_LIGHT2}Press ENTER...{C.RESET}")
 
     async def tcp_test(self):
         self.clear()
         self.matrix_rain(1)
         self.header()
-        print(f"{C.CYAN}║{C.RESET}  {C.BOLD}{C.NEON_BLUE}[TCP LOAD TEST]{C.RESET}{' ' * 98}{C.CYAN}║{C.RESET}")
-        print(f"{C.CYAN}║{C.RESET}  Type: TCP Flood{' ' * 86}{C.CYAN}║{C.RESET}")
+        print(f"{C.GREEN_LIGHT}║{C.RESET}  {C.BOLD}{C.GREEN_MID}[TCP LOAD TEST]{C.RESET}{' ' * 98}{C.GREEN_LIGHT}║{C.RESET}")
+        print(f"{C.GREEN_LIGHT}║{C.RESET}  Type: TCP Flood{' ' * 86}{C.GREEN_LIGHT}║{C.RESET}")
         self.footer()
         
-        url = input(f"\n{C.CYAN}Target URL: {C.WHITE}")
+        url = input(f"\n{C.GREEN_LIGHT2}Target URL: {C.WHITE}")
         if not url.startswith('http'):
             url = 'http://' + url
         
-        threads = safe_int(f"{C.CYAN}Threads (1-{CONFIG['max_threads']}): {C.WHITE}", 100, 1, CONFIG['max_threads'])
+        threads = safe_int(f"{C.GREEN_LIGHT2}Threads (1-{CONFIG['max_threads']}): {C.WHITE}", 100, 1, CONFIG['max_threads'])
         
         t = LoadTester()
         task = asyncio.create_task(t.start_tcp(url, threads))
@@ -692,15 +691,15 @@ class UI:
         self.clear()
         self.matrix_rain(1)
         self.header()
-        print(f"{C.CYAN}║{C.RESET}  {C.BOLD}{C.NEON_BLUE}[ATTACK FINISHED]{C.RESET}{' ' * 95}{C.CYAN}║{C.RESET}")
-        print(f"{C.CYAN}║{C.RESET}  Requests: {C.WHITE}{t.requests:,}{C.RESET}{' ' * 87}{C.CYAN}║{C.RESET}")
-        print(f"{C.CYAN}║{C.RESET}  Success : {C.WHITE}{t.success:,}{C.RESET}{' ' * 88}{C.CYAN}║{C.RESET}")
-        print(f"{C.CYAN}║{C.RESET}  Errors  : {C.WHITE}{t.errors:,}{C.RESET}{' ' * 88}{C.CYAN}║{C.RESET}")
-        print(f"{C.CYAN}║{C.RESET}  Banned  : {C.WHITE}{t.banned}{C.RESET}{' ' * 89}{C.CYAN}║{C.RESET}")
-        print(f"{C.CYAN}║{C.RESET}  Duration: {C.WHITE}{elapsed}s{C.RESET}{' ' * 86}{C.CYAN}║{C.RESET}")
-        print(f"{C.CYAN}║{C.RESET}  Avg Rate: {C.WHITE}{int(t.requests/elapsed) if elapsed>0 else 0} r/s{C.RESET}{' ' * 82}{C.CYAN}║{C.RESET}")
+        print(f"{C.GREEN_LIGHT}║{C.RESET}  {C.BOLD}{C.GREEN_MID}[ATTACK FINISHED]{C.RESET}{' ' * 95}{C.GREEN_LIGHT}║{C.RESET}")
+        print(f"{C.GREEN_LIGHT}║{C.RESET}  Requests: {C.WHITE}{t.requests:,}{C.RESET}{' ' * 87}{C.GREEN_LIGHT}║{C.RESET}")
+        print(f"{C.GREEN_LIGHT}║{C.RESET}  Success : {C.WHITE}{t.success:,}{C.RESET}{' ' * 88}{C.GREEN_LIGHT}║{C.RESET}")
+        print(f"{C.GREEN_LIGHT}║{C.RESET}  Errors  : {C.WHITE}{t.errors:,}{C.RESET}{' ' * 88}{C.GREEN_LIGHT}║{C.RESET}")
+        print(f"{C.GREEN_LIGHT}║{C.RESET}  Banned  : {C.WHITE}{t.banned}{C.RESET}{' ' * 89}{C.GREEN_LIGHT}║{C.RESET}")
+        print(f"{C.GREEN_LIGHT}║{C.RESET}  Duration: {C.WHITE}{elapsed}s{C.RESET}{' ' * 86}{C.GREEN_LIGHT}║{C.RESET}")
+        print(f"{C.GREEN_LIGHT}║{C.RESET}  Avg Rate: {C.WHITE}{int(t.requests/elapsed) if elapsed>0 else 0} r/s{C.RESET}{' ' * 82}{C.GREEN_LIGHT}║{C.RESET}")
         self.footer()
-        input(f"\n{C.CYAN}Press ENTER...{C.RESET}")
+        input(f"\n{C.GREEN_LIGHT2}Press ENTER...{C.RESET}")
 
     def render(self):
         if self.menu == 'main':
@@ -722,19 +721,19 @@ class UI:
         try:
             while self.running:
                 self.render()
-                choice = input(f"\n{C.CYAN}┌─ {C.MAGENTA}Input{C.CYAN} ─────────────────────────────────┐\n{C.CYAN}│{C.RESET} > {C.YELLOW}").strip()
+                choice = input(f"\n{C.GREEN_LIGHT2}┌─ {C.GREEN_MID}Input{C.GREEN_LIGHT2} ─────────────────────────────────┐\n{C.GREEN_LIGHT2}│{C.RESET} > {C.YELLOW}").strip()
                 print(f"{C.RESET}\n")
                 self.handle(choice)
         except KeyboardInterrupt:
             self.clear()
             print(f"""
-{C.MAGENTA}
+{C.GREEN_MID}
 ╔═══════════════════════════════════════════════════════════╗
 ║        TERMINATING NEURAL LINK...                        ║
 ║        System Standby Mode Activated                     ║
 ║        Good Luck, Hacker.                                ║
 ╚═══════════════════════════════════════════════════════════╝
-{C.CYAN}[ErrorCode404] Session Ended - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}{C.RESET}
+{C.GREEN_LIGHT2}[ErrorCode404] Session Ended - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}{C.RESET}
 """)
 
 if __name__ == '__main__':
