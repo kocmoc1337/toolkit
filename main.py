@@ -27,37 +27,97 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# ================= COLORS (как в оригинале) =================
+# ================= COLORS (зелёные оттенки) =================
 Reset = "\033[0m"
 Red = "\033[1;31m"
-Green = "\033[1;33m"      # жёлтый
-Blue = "\033[1;34m"
-Grey = "\033[1;30m"
-Purple = "\033[0;35m"
 
-g = "\033[1;32m"          # зелёный
-r = "\033[1;31m"
+# Зелёные оттенки
+G1 = "\033[38;2;0;60;0m"
+G2 = "\033[38;2;0;90;0m"
+G3 = "\033[38;2;0;120;0m"
+G4 = "\033[38;2;0;160;0m"
+G5 = "\033[38;2;0;200;0m"
+G6 = "\033[38;2;0;230;0m"
+G7 = "\033[38;2;50;255;50m"
+GW = "\033[38;2;200;255;200m"
+g = "\033[1;32m"
 w = "\033[0m"
-b = "\033[1;34m"
-o = "\033[1;33m"          # жёлтый
-bl = "\033[1;36;40m"
 
-# ================= БАННЕР (как в оригинале) =================
+# ================= БОЛЬШОЙ ASCII БАННЕР (зелёный градиент) =================
 def banner():
     print(f"""
-{Green}Version
-{Green}v1.1.0realise
+{G1} ██    ██  ██▓  ▄▄▄█████▓ ██▀███   ▄▄▄         ▓█████▄ ▓█████▄  ▒█████    ██████ {Reset}
+{G2}  ██  ▓██▒▓██▒  ▓  ██▒ ▓▒▓██ ▒ ██▒▒████▄       ▒██▀ ██▌▒██▀ ██▌▒██▒  ██▒▒██    ▒ {Reset}
+{G3}  ▓██  ▒██░▒██░  ▒ ▓██░ ▒░▓██ ░▄█ ▒▒██  ▀█▄     ░██   █▌░██   █▌▒██░  ██▒░ ▓██▄   {Reset}
+{G4}  ▓▓█  ░██░▒██░  ░ ▓██▓ ░ ▒██▀▀█▄  ░██▄▄▄▄██    ░▓█▄   ▌░▓█▄   ▌▒██   ██░  ▒   ██▒{Reset}
+{G5}  ▒▒█████▓ ░██████▒▒██▒ ░ ░██▓ ▒██▒ ▓█   ▓██▒   ░▒████▓ ░▒████▓ ░ ████▓▒░▒██████▒▒{Reset}
+{G6}  ░▒▓▒ ▒ ▒ ░ ▒░▓  ░▒ ░░   ░ ▒▓ ░▒▓░ ▒▒   ▓▒█░    ▒▒▓  ▒  ▒▒▓  ▒ ░ ▒░▒░▒░ ▒ ▒▓▒ ▒ ░{Reset}
+{G5}  ░░▒░ ░ ░ ░ ░ ▒  ░  ░      ░▒ ░ ▒░  ▒   ▒▒ ░    ░ ▒  ▒  ░ ▒  ▒   ░ ▒ ▒░ ░ ░▒  ░ ░{Reset}
+{G3}   ░░░ ░ ░   ░ ░   ░        ░░   ░   ░   ▒       ░ ░  ░  ░ ░  ░ ░ ░ ░ ▒  ░  ░  ░  {Reset}
+{G2}     ░         ░  ░          ░           ░  ░      ░       ░        ░ ░        ░  {Reset}
+{G1}                                               ░       ░                           {Reset}
+""")
 
-{Green}Developer:{w} verifactor @newince
+# ================= АНИМАЦИЯ ЗАПУСКА АТАКИ =================
+def launch_animation():
+    frames = [
+        f"{G7}[{g}▓{G7}░░░░░░░░░] 10%{Reset}",
+        f"{G6}[{g}▓▓{G6}░░░░░░░░] 20%{Reset}",
+        f"{G6}[{g}▓▓▓{G6}░░░░░░░] 30%{Reset}",
+        f"{G5}[{g}▓▓▓▓{G5}░░░░░░] 40%{Reset}",
+        f"{G5}[{g}▓▓▓▓▓{G5}░░░░░] 50%{Reset}",
+        f"{G4}[{g}▓▓▓▓▓▓{G4}░░░░] 60%{Reset}",
+        f"{G4}[{g}▓▓▓▓▓▓▓{G4}░░░] 70%{Reset}",
+        f"{G3}[{g}▓▓▓▓▓▓▓▓{G3}░░] 80%{Reset}",
+        f"{G3}[{g}▓▓▓▓▓▓▓▓▓{G3}░] 90%{Reset}",
+        f"{G2}[{g}▓▓▓▓▓▓▓▓▓▓{G2}] 100%{Reset}",
+    ]
+    
+    for frame in frames:
+        clear()
+        banner()
+        print(f"""
+{G7}Version
+{G7}v1.1.0.0realise
 
-{Green}While IP
-{Green}Target
+{G5}Developer:{GW} verifactor @newince
 
-{Green}While the Port:{w} 8888
+{G3}While IP
+{G3}Target
 
-{Green}Launch DDoS{w}please wait a few seconds
+{G2}While the Port:{GW} 8888
+
+{G1}Launch DDoS{GW}please wait a few seconds
+
+{G6}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{G7}{frame}
+{G6}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {Reset}
 """)
+        time.sleep(0.2)
+    
+    clear()
+    banner()
+    print(f"""
+{G7}Version
+{G7}v1.1.0.0realise
+
+{G5}Developer:{GW} verifactor @newince
+
+{G3}Target loaded successfully!
+
+{G7}[{g}██████████████████████████████████████████████████{G7}] {g}100%{Reset}
+
+{G6}ATTACK STARTED!{Reset}
+""")
+    time.sleep(1)
+
+# ================= МАТРИЧНЫЙ ДОЖДЬ =================
+def matrix_rain(lines=3):
+    chars = ['█', '▓', '▒', '░', '▀', '▄', '◆', '●', '◈', '◉']
+    for _ in range(lines):
+        row = ''.join(random.choices(chars, k=100))
+        print(f"{G2}{row}{Reset}")
 
 # ================= КОНФИГ =================
 CONFIG = {
@@ -277,6 +337,9 @@ class LoadTester:
             asyncio.create_task(self.session.close())
 
 # ================= UI =================
+def clear():
+    os.system('cls')
+
 class UI:
     def __init__(self):
         self.running = True
@@ -293,17 +356,17 @@ class UI:
         self.clear()
         self.header()
         print(f"""
-{Green}ГЛАВНОЕ МЕНЮ
+{G7}ГЛАВНОЕ МЕНЮ
 
-{Green}1.{w} DDos Ip Address
-{Green}2.{w} View Url Ip Address
-{Green}3.{w} DDos site logs
-{Green}4.{w} Proxy Management
-{Green}5.{w} Total Statistics
-{Green}6.{w} History
-{Green}7.{w} Settings
-{Green}8.{w} INFO — инструкция по использованию
-{Green}99.{w} Exit
+{G7}1.{w} DDos Ip Address
+{G6}2.{w} View Url Ip Address
+{G5}3.{w} DDos site logs
+{G4}4.{w} Proxy Management
+{G3}5.{w} Total Statistics
+{G2}6.{w} History
+{G1}7.{w} Settings
+{G7}8.{w} INFO — инструкция по использованию
+{G6}99.{w} Exit
 {Reset}
 """)
 
@@ -311,42 +374,42 @@ class UI:
         self.clear()
         self.header()
         print(f"""
-{Green}ИНСТРУКЦИЯ ПО ИСПОЛЬЗОВАНИЮ
+{G7}ИНСТРУКЦИЯ ПО ИСПОЛЬЗОВАНИЮ
 
-{Green}1.{w} DDOS IP ADDRESS — HTTP/HTTPS флуд по IP
-{Green}2.{w} VIEW URL IP ADDRESS — TCP-флуд по URL
-{Green}3.{w} DDOS SITE LOGS — логи атак
-{Green}4.{w} PROXY MANAGEMENT — управление прокси
-{Green}5.{w} TOTAL STATISTICS — общая статистика
-{Green}6.{w} HISTORY — история атак
-{Green}7.{w} SETTINGS — настройки
-{Green}8.{w} INFO — эта инструкция
-{Green}99.{w} EXIT — выход
+{G7}1.{w} DDOS IP ADDRESS — HTTP/HTTPS флуд по IP
+{G6}2.{w} VIEW URL IP ADDRESS — TCP-флуд по URL
+{G5}3.{w} DDOS SITE LOGS — логи атак
+{G4}4.{w} PROXY MANAGEMENT — управление прокси
+{G3}5.{w} TOTAL STATISTICS — общая статистика
+{G2}6.{w} HISTORY — история атак
+{G1}7.{w} SETTINGS — настройки
+{G7}8.{w} INFO — эта инструкция
+{G6}99.{w} EXIT — выход
 {Reset}
 """)
-        input(f"{Green}Нажми ENTER для возврата...{Reset}")
+        input(f"{G7}Нажми ENTER для возврата...{Reset}")
 
     def settings_menu(self):
         global CONFIG
         self.clear()
         self.header()
         print(f"""
-{Green}НАСТРОЙКИ
+{G7}НАСТРОЙКИ
 
-{Green}1.{w} Max Threads : {CONFIG['max_threads']}
-{Green}2.{w} Timeout     : {CONFIG['timeout']}s
-{Green}3.{w} Max Duration: {CONFIG['max_duration']}s
-{Green}4.{w} Proxy Rot.  : {CONFIG['proxy_rotation_interval']}
-{Green}99.{w} Назад
+{G7}1.{w} Max Threads : {CONFIG['max_threads']}
+{G6}2.{w} Timeout     : {CONFIG['timeout']}s
+{G5}3.{w} Max Duration: {CONFIG['max_duration']}s
+{G4}4.{w} Proxy Rot.  : {CONFIG['proxy_rotation_interval']}
+{G1}99.{w} Назад
 {Reset}
 """)
-        choice = input(f"{Green}Выбери: {w}")
+        choice = input(f"{G7}Выбери: {w}")
         if choice == '1':
-            v = safe_int(f"{Green}Max Threads (100-2000): {w}", 1000, 100, 2000)
+            v = safe_int(f"{G7}Max Threads (100-2000): {w}", 1000, 100, 2000)
             CONFIG['max_threads'] = v
         elif choice == '2':
             while True:
-                v = input(f"{Green}Timeout (0.5-10): {w}")
+                v = input(f"{G7}Timeout (0.5-10): {w}")
                 try:
                     v = float(v)
                     if 0.5 <= v <= 10:
@@ -355,10 +418,10 @@ class UI:
                 except:
                     pass
         elif choice == '3':
-            v = safe_int(f"{Green}Max Duration (0 = no limit): {w}", 0, 0, 99999)
+            v = safe_int(f"{G7}Max Duration (0 = no limit): {w}", 0, 0, 99999)
             CONFIG['max_duration'] = v
         elif choice == '4':
-            v = safe_int(f"{Green}Proxy Rotation (5-100): {w}", 10, 5, 100)
+            v = safe_int(f"{G7}Proxy Rotation (5-100): {w}", 10, 5, 100)
             CONFIG['proxy_rotation_interval'] = v
         elif choice == '99':
             return
@@ -368,46 +431,46 @@ class UI:
         self.clear()
         self.header()
         h = load_history()
-        print(f"{Green}ИСТОРИЯ (последние 10){Reset}")
+        print(f"{G7}ИСТОРИЯ (последние 10){Reset}")
         if not h:
-            print(f"{Green}Нет записей{Reset}")
+            print(f"{G3}Нет записей{Reset}")
         else:
             for i, e in enumerate(h[-10:], 1):
                 t = e.get('target', 'N/A')[:25]
                 r = e.get('requests', 0)
                 ts = e.get('timestamp', '')[:16]
-                print(f"{Green}{i}.{w} {t}  {Green}{r} req{w}  {Green}{ts}{Reset}")
-        input(f"{Green}Нажми ENTER...{Reset}")
+                print(f"{G7}{i}.{w} {t}  {G5}{r} req{w}  {G3}{ts}{Reset}")
+        input(f"{G7}Нажми ENTER...{Reset}")
 
     def stats_menu(self):
         self.clear()
         self.header()
         s = load_stats()
         print(f"""
-{Green}ОБЩАЯ СТАТИСТИКА
+{G7}ОБЩАЯ СТАТИСТИКА
 
-{Green}Атак    : {w}{s['attacks']}
-{Green}Запросов: {w}{s['requests']:,}
-{Green}Успешно : {w}{s['success']:,}
-{Green}Ошибок  : {w}{s['errors']:,}
+{G7}Атак    : {w}{s['attacks']}
+{G6}Запросов: {w}{s['requests']:,}
+{G5}Успешно : {w}{s['success']:,}
+{G4}Ошибок  : {w}{s['errors']:,}
 {Reset}
 """)
-        input(f"{Green}Нажми ENTER...{Reset}")
+        input(f"{G7}Нажми ENTER...{Reset}")
 
     def logs_menu(self):
         self.clear()
         self.header()
         s = load_stats()
         print(f"""
-{Green}ЛОГИ СИСТЕМЫ
+{G7}ЛОГИ СИСТЕМЫ
 
-{Green}Всего атак    : {w}{s['attacks']}
-{Green}Всего запросов: {w}{s['requests']:,}
-{Green}Всего успешно : {w}{s['success']:,}
-{Green}Всего ошибок  : {w}{s['errors']:,}
+{G7}Всего атак    : {w}{s['attacks']}
+{G6}Всего запросов: {w}{s['requests']:,}
+{G5}Всего успешно : {w}{s['success']:,}
+{G4}Всего ошибок  : {w}{s['errors']:,}
 {Reset}
 """)
-        input(f"{Green}Нажми ENTER...{Reset}")
+        input(f"{G7}Нажми ENTER...{Reset}")
 
     def proxy_menu(self):
         self.clear()
@@ -418,43 +481,43 @@ class UI:
         except:
             proxies = []
         print(f"""
-{Green}УПРАВЛЕНИЕ ПРОКСИ
+{G7}УПРАВЛЕНИЕ ПРОКСИ
 
-{Green}1.{w} Добавить прокси вручную
-{Green}2.{w} Загрузить из файла
-{Green}3.{w} Показать список ({len(proxies)})
-{Green}4.{w} Очистить список
-{Green}5.{w} Проверить все прокси
-{Green}99.{w} Назад
+{G7}1.{w} Добавить прокси вручную
+{G6}2.{w} Загрузить из файла
+{G5}3.{w} Показать список ({len(proxies)})
+{G4}4.{w} Очистить список
+{G3}5.{w} Проверить все прокси
+{G1}99.{w} Назад
 {Reset}
 """)
-        choice = input(f"{Green}Выбери: {w}")
+        choice = input(f"{G7}Выбери: {w}")
         if choice == '1':
-            p = input(f"{Green}Прокси (http://ip:port): {w}")
+            p = input(f"{G7}Прокси (http://ip:port): {w}")
             if p:
                 with open('proxies.txt', 'a') as f:
                     f.write(p + '\n')
-                print(f"{Green}[OK] Добавлен{Reset}")
+                print(f"{G7}[OK] Добавлен{Reset}")
         elif choice == '2':
             try:
                 with open('proxies.txt', 'r') as f:
                     cnt = len([l for l in f if l.strip()])
-                print(f"{Green}[OK] Загружено {cnt}{Reset}")
+                print(f"{G7}[OK] Загружено {cnt}{Reset}")
             except:
                 print(f"{Red}[!] Файл не найден{Reset}")
         elif choice == '3':
             if proxies:
-                print(f"\n{Green}Список:{Reset}")
+                print(f"\n{G7}Список:{Reset}")
                 for i, p in enumerate(proxies, 1):
-                    print(f"{Green}{i}. {w}{p}{Reset}")
+                    print(f"{G7}{i}. {w}{p}{Reset}")
             else:
                 print(f"{Red}[!] Пусто{Reset}")
-            input(f"{Green}Нажми ENTER...{Reset}")
+            input(f"{G7}Нажми ENTER...{Reset}")
         elif choice == '4':
             open('proxies.txt', 'w').close()
-            print(f"{Green}[OK] Очищено{Reset}")
+            print(f"{G7}[OK] Очищено{Reset}")
         elif choice == '5':
-            print(f"{Green}[!] Проверка...{Reset}")
+            print(f"{G7}[!] Проверка...{Reset}")
             async def check():
                 valid = []
                 for p in proxies:
@@ -465,7 +528,7 @@ class UI:
                 valid = asyncio.run(check())
                 with open('proxies.txt', 'w') as f:
                     f.write('\n'.join(valid))
-                print(f"{Green}[OK] Работает: {len(valid)}/{len(proxies)}{Reset}")
+                print(f"{G7}[OK] Работает: {len(valid)}/{len(proxies)}{Reset}")
             time.sleep(1)
         elif choice == '99':
             return
@@ -480,19 +543,19 @@ class UI:
         self.clear()
         self.header()
         print(f"""
-{Green}АТАКА В ПРОЦЕССЕ
+{G7}АТАКА В ПРОЦЕССЕ
 
-{Green}Цель   : {w}{url[:30]}
-{Green}Потоки : {w}{threads}
-{Green}Запросы: {w}{t.requests:,}
-{Green}Скорость: {w}{rate:,} r/s
-{Green}Успешно: {w}{t.success:,}
-{Green}Ошибки : {w}{t.errors:,}
-{Green}Бан    : {w}{t.banned}
-{Green}Нагрузка: {w}[{bar}] {load}%
-{Green}Время   : {w}{elapsed//3600:02d}:{elapsed%3600//60:02d}:{elapsed%60:02d}
-{Green}Данные  : {w}{t.bytes_sent/1024/1024:.1f} MB
-{Green}[Press ENTER to stop]
+{G7}Цель   : {w}{url[:30]}
+{G6}Потоки : {w}{threads}
+{G5}Запросы: {w}{t.requests:,}
+{G4}Скорость: {w}{rate:,} r/s
+{G3}Успешно: {w}{t.success:,}
+{G2}Ошибки : {w}{t.errors:,}
+{G1}Бан    : {w}{t.banned}
+{G5}Нагрузка: {w}[{bar}] {load}%
+{G6}Время   : {w}{elapsed//3600:02d}:{elapsed%3600//60:02d}:{elapsed%60:02d}
+{G7}Данные  : {w}{t.bytes_sent/1024/1024:.1f} MB
+{G7}[Press ENTER to stop]
 {Reset}
 """)
 
@@ -520,15 +583,17 @@ class UI:
             self.menu = 'main'
 
     async def http_test(self):
+        launch_animation()
+        
         self.clear()
         self.header()
-        print(f"{Green}HTTP НАГРУЗКА — HTTP/HTTPS Flood{Reset}")
+        print(f"{G7}HTTP НАГРУЗКА — HTTP/HTTPS Flood{Reset}")
         
-        url = input(f"{Green}Цель: {w}")
+        url = input(f"{G7}Цель: {w}")
         if not url.startswith('http'):
             url = 'http://' + url
         
-        threads = safe_int(f"{Green}Потоки (1-{CONFIG['max_threads']}): {w}", 100, 1, CONFIG['max_threads'])
+        threads = safe_int(f"{G7}Потоки (1-{CONFIG['max_threads']}): {w}", 100, 1, CONFIG['max_threads'])
         
         t = LoadTester()
         task = asyncio.create_task(t.start_http(url, threads))
@@ -559,28 +624,30 @@ class UI:
         self.clear()
         self.header()
         print(f"""
-{Green}АТАКА ЗАВЕРШЕНА
+{G7}АТАКА ЗАВЕРШЕНА
 
-{Green}Запросы: {w}{t.requests:,}
-{Green}Успешно: {w}{t.success:,}
-{Green}Ошибки : {w}{t.errors:,}
-{Green}Бан    : {w}{t.banned}
-{Green}Время  : {w}{elapsed} сек
-{Green}Скорость: {w}{int(t.requests/elapsed) if elapsed>0 else 0} r/s
+{G7}Запросы: {w}{t.requests:,}
+{G6}Успешно: {w}{t.success:,}
+{G5}Ошибки : {w}{t.errors:,}
+{G4}Бан    : {w}{t.banned}
+{G3}Время  : {w}{elapsed} сек
+{G2}Скорость: {w}{int(t.requests/elapsed) if elapsed>0 else 0} r/s
 {Reset}
 """)
-        input(f"{Green}Нажми ENTER...{Reset}")
+        input(f"{G7}Нажми ENTER...{Reset}")
 
     async def tcp_test(self):
+        launch_animation()
+        
         self.clear()
         self.header()
-        print(f"{Green}TCP НАГРУЗКА — TCP Flood{Reset}")
+        print(f"{G7}TCP НАГРУЗКА — TCP Flood{Reset}")
         
-        url = input(f"{Green}Цель: {w}")
+        url = input(f"{G7}Цель: {w}")
         if not url.startswith('http'):
             url = 'http://' + url
         
-        threads = safe_int(f"{Green}Потоки (1-{CONFIG['max_threads']}): {w}", 100, 1, CONFIG['max_threads'])
+        threads = safe_int(f"{G7}Потоки (1-{CONFIG['max_threads']}): {w}", 100, 1, CONFIG['max_threads'])
         
         t = LoadTester()
         task = asyncio.create_task(t.start_tcp(url, threads))
@@ -611,17 +678,17 @@ class UI:
         self.clear()
         self.header()
         print(f"""
-{Green}АТАКА ЗАВЕРШЕНА
+{G7}АТАКА ЗАВЕРШЕНА
 
-{Green}Запросы: {w}{t.requests:,}
-{Green}Успешно: {w}{t.success:,}
-{Green}Ошибки : {w}{t.errors:,}
-{Green}Бан    : {w}{t.banned}
-{Green}Время  : {w}{elapsed} сек
-{Green}Скорость: {w}{int(t.requests/elapsed) if elapsed>0 else 0} r/s
+{G7}Запросы: {w}{t.requests:,}
+{G6}Успешно: {w}{t.success:,}
+{G5}Ошибки : {w}{t.errors:,}
+{G4}Бан    : {w}{t.banned}
+{G3}Время  : {w}{elapsed} сек
+{G2}Скорость: {w}{int(t.requests/elapsed) if elapsed>0 else 0} r/s
 {Reset}
 """)
-        input(f"{Green}Нажми ENTER...{Reset}")
+        input(f"{G7}Нажми ENTER...{Reset}")
 
     def render(self):
         if self.menu == 'main':
@@ -643,19 +710,19 @@ class UI:
         try:
             while self.running:
                 self.render()
-                choice = input(f"\n{Green}┌─ {Green}Input{Green} ─────────────────────────────────┐\n{Green}│{Reset} > {w}").strip()
+                choice = input(f"\n{G7}┌─ {G5}Input{G7} ─────────────────────────────────┐\n{G7}│{Reset} > {w}").strip()
                 print(f"{Reset}\n")
                 self.handle(choice)
         except KeyboardInterrupt:
             self.clear()
             print(f"""
-{Green}
+{G7}
 ╔═══════════════════════════════════════════════════════════╗
 ║        TERMINATING NEURAL LINK...                        ║
 ║        System Standby Mode Activated                     ║
 ║        Good Luck, Hacker.                                ║
 ╚═══════════════════════════════════════════════════════════╝
-{Green}[ErrorCode404] Session Ended - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}{Reset}
+{G7}[ErrorCode404] Session Ended - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}{Reset}
 """)
 
 if __name__ == '__main__':
