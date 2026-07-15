@@ -146,25 +146,37 @@ class Attack:
     def stop(self):
         self.running = False
 
-# ================= ВЫВОД (ВСЁ В ЗЕЛЁНОМ ГРАДИЕНТЕ) =================
-def attack_view(url, threads, a):
+# ================= ВЫВОД (БЕЗ МЕРЦАНИЯ - ТОЛЬКО ЦИФРЫ) =================
+def attack_view_smooth(url, threads, a, prev_data=None):
     elapsed = int(time.time() - a.start)
     rate = int(a.req / elapsed) if elapsed > 0 else 0
     load = min(100, int((rate / (threads * 3)) * 100)) if threads > 0 else 0
     stats = load_stats()
     
-    clear()
-    print(f"""
+    # Данные для сравнения
+    data = {
+        'req': a.req, 'ok': a.ok, 'err': a.err, 'ban': a.ban,
+        'bytes': a.bytes, 'elapsed': elapsed, 'rate': rate, 'load': load
+    }
+    
+    # Если ничего не изменилось - не обновляем
+    if prev_data and data == prev_data:
+        return data
+    
+    # Полная перерисовка (но без мерцания - через ANSI-код)
+    sys.stdout.write('\033[H\033[J')  # Очистка без мерцания
+    sys.stdout.flush()
+    
+    output = f"""
 {G7}HTTP АТАКА В ПРОЦЕССЕ
 
 {G6}Цель      : {W}{url[:30]}
-{G5}Потоки    : {W}{threads}
+{G5}Потоки    : {W}{threads}  [{bar(load)}]
 {G4}Запросы   : {W}{a.req:,}
 {G3}Скорость  : {W}{rate:,} r/s
 {G4}Успешно   : {G}{a.ok:,}{E}
 {G5}Ошибки    : {R}{a.err:,}{E}
 {G6}Бан       : {R}{a.ban}{E}
-{G7}Нагрузка  : {W}{bar(load)}
 {G6}Время     : {W}{elapsed//3600:02d}:{elapsed%3600//60:02d}:{elapsed%60:02d}
 {G5}Данные    : {W}{a.bytes/1024/1024:.1f} MB
 {G4}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -174,7 +186,11 @@ def attack_view(url, threads, a):
 {G4}Всего ошибок         : {R}{stats['errors']:,}{E}
 {G7}[Press ENTER to stop]
 {E}
-""")
+"""
+    sys.stdout.write(output)
+    sys.stdout.flush()
+    
+    return data
 
 # ================= ЗАПУСК =================
 def run_test():
@@ -197,9 +213,10 @@ def run_test():
         a.stop()
     threading.Thread(target=wait, daemon=True).start()
     
+    prev_data = None
     try:
         while a.running and not stop[0]:
-            attack_view(url, threads, a)
+            prev_data = attack_view_smooth(url, threads, a, prev_data)
             time.sleep(0.3)
     except KeyboardInterrupt:
         a.stop()
