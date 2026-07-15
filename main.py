@@ -27,23 +27,24 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# ================= COLORS (зелёные оттенки) =================
+# ================= COLORS (светлые зелёные оттенки) =================
 Reset = "\033[0m"
 Red = "\033[1;31m"
 
-# Зелёные оттенки
-G1 = "\033[38;2;0;60;0m"
-G2 = "\033[38;2;0;90;0m"
-G3 = "\033[38;2;0;120;0m"
-G4 = "\033[38;2;0;160;0m"
-G5 = "\033[38;2;0;200;0m"
-G6 = "\033[38;2;0;230;0m"
-G7 = "\033[38;2;50;255;50m"
-GW = "\033[38;2;200;255;200m"
+# Светлые зелёные оттенки
+G1 = "\033[38;2;100;200;100m"   # светлый
+G2 = "\033[38;2;120;220;120m"   # светлее
+G3 = "\033[38;2;140;240;140m"   # ещё светлее
+G4 = "\033[38;2;160;255;160m"   # очень светлый
+G5 = "\033[38;2;180;255;180m"   # почти белый
+G6 = "\033[38;2;200;255;200m"   # почти белый
+G7 = "\033[38;2;220;255;220m"   # почти белый
+GW = "\033[38;2;240;255;240m"   # белый с оттенком
+
 g = "\033[1;32m"
 w = "\033[0m"
 
-# ================= БОЛЬШОЙ ASCII БАННЕР (зелёный градиент) =================
+# ================= БОЛЬШОЙ ASCII БАННЕР (светлый зелёный градиент) =================
 def banner():
     print(f"""
 {G1} ██    ██  ██▓  ▄▄▄█████▓ ██▀███   ▄▄▄         ▓█████▄ ▓█████▄  ▒█████    ██████ {Reset}
@@ -56,9 +57,22 @@ def banner():
 {G3}   ░░░ ░ ░   ░ ░   ░        ░░   ░   ░   ▒       ░ ░  ░  ░ ░  ░ ░ ░ ░ ▒  ░  ░  ░  {Reset}
 {G2}     ░         ░  ░          ░           ░  ░      ░       ░        ░ ░        ░  {Reset}
 {G1}                                               ░       ░                           {Reset}
+{G7}
+{G7}Version
+{G7}v1.1.0.0realise
+
+{G5}Developer:{GW} verifactor @newince
+
+{G3}While IP
+{G3}Target
+
+{G2}While the Port:{GW} 8888
+
+{G1}Launch DDoS{GW}please wait a few seconds
+{Reset}
 """)
 
-# ================= АНИМАЦИЯ ЗАПУСКА АТАКИ =================
+# ================= АНИМАЦИЯ ЗАПУСКА АТАКИ (без матрицы) =================
 def launch_animation():
     frames = [
         f"{G7}[{g}▓{G7}░░░░░░░░░] 10%{Reset}",
@@ -111,13 +125,6 @@ def launch_animation():
 {G6}ATTACK STARTED!{Reset}
 """)
     time.sleep(1)
-
-# ================= МАТРИЧНЫЙ ДОЖДЬ =================
-def matrix_rain(lines=3):
-    chars = ['█', '▓', '▒', '░', '▀', '▄', '◆', '●', '◈', '◉']
-    for _ in range(lines):
-        row = ''.join(random.choices(chars, k=100))
-        print(f"{G2}{row}{Reset}")
 
 # ================= КОНФИГ =================
 CONFIG = {
@@ -534,7 +541,7 @@ class UI:
             return
         self.proxy_menu()
 
-    def attack_progress(self, url, threads, t):
+    def attack_progress(self, url, threads, t, attack_type="HTTP"):
         elapsed = int(time.time() - t.start_time)
         rate = int(t.requests / elapsed) if elapsed > 0 else 0
         load = min(100, int(rate / 15))
@@ -543,7 +550,7 @@ class UI:
         self.clear()
         self.header()
         print(f"""
-{G7}АТАКА В ПРОЦЕССЕ
+{G7}{attack_type} АТАКА В ПРОЦЕССЕ
 
 {G7}Цель   : {w}{url[:30]}
 {G6}Потоки : {w}{threads}
@@ -555,6 +562,8 @@ class UI:
 {G5}Нагрузка: {w}[{bar}] {load}%
 {G6}Время   : {w}{elapsed//3600:02d}:{elapsed%3600//60:02d}:{elapsed%60:02d}
 {G7}Данные  : {w}{t.bytes_sent/1024/1024:.1f} MB
+{G7}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{G6}Всего атак за сессию: {w}{load_stats()['attacks']}
 {G7}[Press ENTER to stop]
 {Reset}
 """)
@@ -599,7 +608,7 @@ class UI:
         task = asyncio.create_task(t.start_http(url, threads))
         
         while t.running:
-            self.attack_progress(url, threads, t)
+            self.attack_progress(url, threads, t, "HTTP")
             await asyncio.sleep(0.3)
         
         t.stop()
@@ -632,6 +641,8 @@ class UI:
 {G4}Бан    : {w}{t.banned}
 {G3}Время  : {w}{elapsed} сек
 {G2}Скорость: {w}{int(t.requests/elapsed) if elapsed>0 else 0} r/s
+{G7}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{G6}Всего атак за сессию: {w}{load_stats()['attacks']}
 {Reset}
 """)
         input(f"{G7}Нажми ENTER...{Reset}")
@@ -653,7 +664,7 @@ class UI:
         task = asyncio.create_task(t.start_tcp(url, threads))
         
         while t.running:
-            self.attack_progress(url, threads, t)
+            self.attack_progress(url, threads, t, "TCP")
             await asyncio.sleep(0.3)
         
         t.stop()
@@ -686,6 +697,8 @@ class UI:
 {G4}Бан    : {w}{t.banned}
 {G3}Время  : {w}{elapsed} сек
 {G2}Скорость: {w}{int(t.requests/elapsed) if elapsed>0 else 0} r/s
+{G7}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{G6}Всего атак за сессию: {w}{load_stats()['attacks']}
 {Reset}
 """)
         input(f"{G7}Нажми ENTER...{Reset}")
